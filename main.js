@@ -76,29 +76,65 @@ bot.hears('hi', (ctx) => ctx.reply('Hey there'))
 bot.command('status', (ctx) => {
     console.log('/status')
     
-    var replyStr = 'Фаза 1\n'+
-    `Напряжение: ${v1}V\n`+
-    `Сила тока: ${a1}A\n`+
-    `Мощность: ${w1}W\n`+
-    `Потребление: ${wh1}Wh\n\n`+
-    
-    'Фаза 2\n'+
-    `Напряжение: ${v2}V\n`+
-    `Сила тока: ${a2}A\n`+
-    `Мощность: ${w2}W\n`+
-    `Потребление: ${wh2}Wh\n\n`+
-    
-    'Фаза 3\n'+
-    `Напряжение: ${v3}V\n`+
-    `Сила тока: ${a3}A\n`+
-    `Мощность: ${w3}W\n`+
-    `Потребление: ${wh3}Wh\n`
+    var endsAfter = config.updateMsgTimeout
+
+    var chat = ctx.update.message.chat
+    //var from = ctx.update.message.from
+    var msgId
+
+    function replyStr() {
+        return 'Фаза 1\n'+
+        `Напряжение: ${v1}V\n`+
+        `Сила тока: ${a1}A\n`+
+        `Мощность: ${w1}W\n`+
+        `Потребление: ${wh1}Wh\n\n`+
+        
+        'Фаза 2\n'+
+        `Напряжение: ${v2}V\n`+
+        `Сила тока: ${a2}A\n`+
+        `Мощность: ${w2}W\n`+
+        `Потребление: ${wh2}Wh\n\n`+
+        
+        'Фаза 3\n'+
+        `Напряжение: ${v3}V\n`+
+        `Сила тока: ${a3}A\n`+
+        `Мощность: ${w3}W\n`+
+        `Потребление: ${wh3}Wh\n`
+    }
 
     if(serialPort.isOpen){
-        ctx.reply(replyStr)
+        ctx.reply(replyStr() + `\nОбновление в реальном времени(${endsAfter/1000}с)\n`).then(
+            function(value) {
+                msgId = value.message_id
+            }, 
+            function(reason) {
+                console.log('Не получилось: ' + reason); // Ошибка!
+            }
+        )
     }else {
-        ctx.reply('Устройство считывания оффлайн \n \n Последние данные:\n' + replyStr)
+        ctx.reply('Устройство считывания оффлайн \n \n Последние данные:\n' + replyStr())
     }
+
+    function updateMsg(){
+        endsAfter -= 1000;
+        bot.telegram.editMessageText(chat.id, msgId, undefined, replyStr() + `\nОбновление в реальном времени(${endsAfter/1000}с)\n`).then(
+            function(value) {
+                msgId = value.message_id
+            }, 
+            function(reason) {
+                console.log('Не получилось: ' + reason); // Ошибка!
+            }
+        )
+    }
+
+    var updateInterval = setInterval(updateMsg, 1000)
+
+
+    setTimeout( () => {
+        clearInterval(updateInterval)
+        bot.telegram.editMessageText(chat.id, msgId, undefined, replyStr()) 
+    } ,config.updateMsgTimeout)
+
 })
 
 bot.command('quit', (ctx) => {
