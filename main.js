@@ -88,6 +88,8 @@ bot.start((ctx) => {
 // bot.on('sticker', (ctx) => ctx.reply('👍'))
 // bot.hears('hi', (ctx) => ctx.reply('Hey there'))
 
+
+
 bot.command('test',(ctx)=>{
     var uid = ctx.from.id
     ctx.reply(userData[uid])
@@ -133,6 +135,7 @@ bot.command('status', (ctx) => {
         )
     }else {
         ctx.reply('Устройство считывания оффлайн \n \n Последние данные:\n' + replyStr())
+        return
     }
 
     function updateMsg(){
@@ -162,6 +165,73 @@ bot.command('quit', (ctx) => {
     //ctx.leaveChat()
     ctx.reply('quit ', Markup.removeKeyboard() )
     //Чето нада
+})
+
+bot.on('text',(ctx) => {
+    var txt = ctx.message.text
+    var uid = ctx.message.from.id
+
+    console.log(userData[uid].state)
+
+    try{
+        switch(userData[uid].state){
+
+            case 0:
+                switch(txt){
+                    case 'Настройки':
+                        userData[uid].state = 1
+                        ctx.reply('Настройки',kb.settingsKb) //Надо найти как выслать клавиатуру без отправки текста
+                        break
+                    default:
+                        break
+                }
+                break
+
+            case 1:
+                switch(txt){
+                    case'Язык':
+                        userData[uid].state = 2
+                        ctx.reply('Главное меню', kb.langKb)
+                        break
+                    
+                    case'Таймаут обновления в реальном времени':
+                        userData[uid].state = 3
+                        
+                        break
+
+                    case'Уведомления':
+                        userData[uid].state = 4
+                        
+                        break
+
+                    case'Назад':
+                        userData[uid].state = 0
+                        ctx.reply('Главное меню', kb.mainKb)
+                        break
+                }
+                break
+            
+            case 2:
+                switch(txt){
+                    case'Русский':
+                        userData[uid].settings.lang = 0
+                        break
+                    case'English':
+                        userData[uid].settings.lang = 1
+                        break
+                    case'Назад':
+                        userData[uid].state = 1
+                        ctx.reply('Настройки',kb.settingsKb)
+                        break
+                }
+                break
+
+            default:
+                break
+        }
+    }catch(e){
+        console.error(e)
+    }
 })
 
 bot.launch()
