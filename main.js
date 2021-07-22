@@ -196,7 +196,7 @@ bot.on('text',(ctx) => {
                     
                     case'Таймаут обновления в реальном времени':
                         userData[uid].state = 3
-                        
+                        ctx.reply('Введите кол-во секунд',Markup.removeKeyboard())
                         break
 
                     case'Уведомления':
@@ -223,6 +223,15 @@ bot.on('text',(ctx) => {
                         userData[uid].state = 1
                         ctx.reply('Настройки',kb.settingsKb)
                         break
+                }
+                break
+
+            case 3:
+                var val = parseInt(txt)
+                if (val < 500){
+                    userData[uid].settings.updateMsgTimeout = val * 1000
+                }else{
+                    ctx.reply('Введите число не больше 500')
                 }
                 break
 
