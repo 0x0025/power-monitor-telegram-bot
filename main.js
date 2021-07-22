@@ -8,6 +8,8 @@ var w1, w2, w3
 var wh1, wh2, wh3
 var a1, a2, a3
 
+var userData = {}
+
 var portOpenRetry
 var serialPort = new SerialPort(config.serialPort, { //TODO: Авто определение порта
     baudRate: config.baudRate,
@@ -67,11 +69,26 @@ serialPort.pipe(new StringStream) // pipe the stream to scramjet StringStream
 
 const bot = new Telegraf(config.token)
 
-bot.start((ctx) => ctx.reply('Welcome'))
-bot.help((ctx) => ctx.reply('Send me a sticker'))
-bot.on('sticker', (ctx) => ctx.reply('👍'))
-bot.hears('hi', (ctx) => ctx.reply('Hey there'))
+bot.start((ctx) => {
+    var uid = ctx.from.id
+    Object.assign(userData, {
+        [uid]:{
+            state:1,
+            settings:{}
+        }
+    })
 
+    ctx.reply('Welcome')
+})
+
+// bot.help((ctx) => ctx.reply('Send me a sticker'))
+// bot.on('sticker', (ctx) => ctx.reply('👍'))
+// bot.hears('hi', (ctx) => ctx.reply('Hey there'))
+
+bot.command('test',(ctx)=>{
+    var uid = ctx.from.id
+    ctx.reply(userData[uid])
+})
 
 bot.command('status', (ctx) => {
     console.log('/status')
