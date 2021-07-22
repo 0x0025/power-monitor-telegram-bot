@@ -1,7 +1,10 @@
-const { Telegraf } = require('telegraf')
+const { Telegraf, Markup } = require('telegraf')
 var SerialPort = require('serialport')
 const { StringStream } = require('scramjet') 
 var config = require('./config.json')
+
+var kb = require('./keyboards.js');
+
 
 var v1, v2, v3
 var w1, w2, w3
@@ -73,12 +76,12 @@ bot.start((ctx) => {
     var uid = ctx.from.id
     Object.assign(userData, {
         [uid]:{
-            state:1,
+            state:0,
             settings:{}
         }
     })
 
-    ctx.reply('Welcome')
+    ctx.reply('Welcome', kb.mainKb)
 })
 
 // bot.help((ctx) => ctx.reply('Send me a sticker'))
@@ -157,7 +160,7 @@ bot.command('status', (ctx) => {
 bot.command('quit', (ctx) => {
     //ctx.telegram.leaveChat(ctx.message.chat.id)
     //ctx.leaveChat()
-
+    ctx.reply('quit ', Markup.removeKeyboard() )
     //Чето нада
 })
 
