@@ -4,7 +4,7 @@ const { StringStream } = require('scramjet')
 var config = require('./config.json')
 
 var kb = require('./keyboards.js');
-
+var fs = require('fs');
 
 var v1, v2, v3
 var w1, w2, w3
@@ -12,6 +12,23 @@ var wh1, wh2, wh3
 var a1, a2, a3
 
 var userData = {}
+
+function readUserData(){
+    fs.readFile('./userData.json',{encoding: 'utf8'},function(err,data) {
+        userData = JSON.parse(data);
+        console.log('readUserData()')
+    })
+}
+
+function writeUserData(){
+    fs.writeFile('./userData.json', JSON.stringify(userData,null,'\t'), function(err) {
+        if(err) return console.error(err);
+        console.log('writeUserData()')
+    }) 
+}
+
+setInterval(writeUserData, 30000)
+readUserData()
 
 var portOpenRetry
 var serialPort = new SerialPort(config.serialPort, { //TODO: Авто определение порта
@@ -63,7 +80,6 @@ function tryOpenPort(){
 }
 
 
-
 serialPort.pipe(new StringStream) // pipe the stream to scramjet StringStream
     .lines('\n')                  // split per line
     .each(                        // send message per every line
@@ -78,7 +94,7 @@ bot.start((ctx) => {
         [uid]:{
             state:0,
             settings:{
-                updateMsgTimeout: 5000
+                updateMsgTimeout: 5000 //Тут можно из кфг брать
             }
         }
     })
@@ -168,6 +184,15 @@ bot.command('status', (ctx) => {
         bot.telegram.editMessageText(chat.id, msgId, undefined, replyStr()) 
     } ,duration)
 
+})
+
+
+bot.command('read', (ctx) => { //Потом урать
+    readUserData()
+})
+
+bot.command('write', (ctx) => {
+    writeUserData()
 })
 
 bot.command('quit', (ctx) => {

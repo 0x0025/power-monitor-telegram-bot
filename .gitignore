@@ -2,6 +2,7 @@ config.json
 test1.js
 test2.js
 .vscode
+userData.json
 
 # Logs
 logs
