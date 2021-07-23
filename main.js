@@ -77,7 +77,9 @@ bot.start((ctx) => {
     Object.assign(userData, {
         [uid]:{
             state:0,
-            settings:{}
+            settings:{
+                updateMsgTimeout: 5000
+            }
         }
     })
 
@@ -98,12 +100,20 @@ bot.command('test',(ctx)=>{
 bot.command('status', (ctx) => {
     console.log('/status')
     
-    var endsAfter = config.updateMsgTimeout
-
+    var uid = ctx.message.from.id
     var chat = ctx.update.message.chat
-    //var from = ctx.update.message.from
     var msgId
 
+    var duration = userData[uid].settings.updateMsgTimeout
+    // if( typeof userData[uid].settings.updateMsgTimeout !== 'undefined' && userData[uid].settings.updateMsgTimeout <= 500){ //Норм проверку сделать
+    //     duration = userData[uid].settings.updateMsgTimeout
+    // }else{
+    //     duration = 10
+    // }
+
+    var endsAfter = duration
+    var updateInterval
+    
     function replyStr() {
         return 'Фаза 1\n'+
         `Напряжение: ${v1}V\n`+
@@ -131,6 +141,7 @@ bot.command('status', (ctx) => {
             }, 
             function(reason) {
                 console.log('Не получилось: ' + reason); // Ошибка!
+                //Выход сделать
             }
         )
     }else {
@@ -150,13 +161,12 @@ bot.command('status', (ctx) => {
         )
     }
 
-    var updateInterval = setInterval(updateMsg, 1000)
-
+    updateInterval = setInterval(updateMsg, 1000)
 
     setTimeout( () => {
         clearInterval(updateInterval)
         bot.telegram.editMessageText(chat.id, msgId, undefined, replyStr()) 
-    } ,config.updateMsgTimeout)
+    } ,duration)
 
 })
 
@@ -191,17 +201,17 @@ bot.on('text',(ctx) => {
                 switch(txt){
                     case'Язык':
                         userData[uid].state = 2
-                        ctx.reply('Главное меню', kb.langKb)
+                        ctx.reply('Настройка языка', kb.langKb)
                         break
                     
                     case'Таймаут обновления в реальном времени':
                         userData[uid].state = 3
-                        ctx.reply('Введите кол-во секунд',Markup.removeKeyboard())
+                        ctx.reply('Введите кол-во секунд', Markup.removeKeyboard())
                         break
 
                     case'Уведомления':
                         userData[uid].state = 4
-                        
+                        ctx.reply('Настройка уведомлений', kb.notificationsKb)
                         break
 
                     case'Назад':
@@ -230,8 +240,20 @@ bot.on('text',(ctx) => {
                 var val = parseInt(txt)
                 if (val < 500){
                     userData[uid].settings.updateMsgTimeout = val * 1000
+                    userData[uid].state = 1
+                    ctx.reply('Настройки',kb.settingsKb)
                 }else{
                     ctx.reply('Введите число не больше 500')
+                }
+                break
+
+            case 4:
+                switch (txt){
+                    case 'Назад':
+                        userData[uid].state = 1
+                        ctx.reply('Настройки',kb.settingsKb)
+                        break
+                    
                 }
                 break
 

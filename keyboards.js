@@ -36,6 +36,18 @@ var langKb = Markup.keyboard(
     ]
 ).resize()
 
+var notificationsKb = Markup.keyboard(
+    [
+        [
+            'Тут пока нефига нет'
+        ],
+        [
+            'Назад'
+        ]
+    ]
+).resize()
+
+module.exports.notificationsKb = notificationsKb
 module.exports.mainKb = mainKb
 module.exports.settingsKb = settingsKb
 module.exports.langKb = langKb
