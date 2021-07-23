@@ -1,4 +1,4 @@
-const { Markup } = require('telegraf')
+const { Markup } = require('telegraf');
 
 var mainKb = Markup.keyboard(
     [
@@ -7,13 +7,13 @@ var mainKb = Markup.keyboard(
             'Настройки'
         ]
     ]
-).resize()
+).resize();
 
 var settingsKb = Markup.keyboard(
     [
         [
             'Язык',
-            'Таймаут обновления в реальном времени'
+            'Таймаут обновления /status'
         ],
         [
             'Уведомления'
@@ -22,7 +22,7 @@ var settingsKb = Markup.keyboard(
             'Назад'
         ]
     ]
-).resize()
+).resize();
 
 var langKb = Markup.keyboard(
     [
@@ -34,20 +34,20 @@ var langKb = Markup.keyboard(
             'Назад'
         ]
     ]
-).resize()
+).resize();
 
 var notificationsKb = Markup.keyboard(
     [
         [
-            'Тут пока нефига нет'
+            'Тут пока ничего нет'
         ],
         [
             'Назад'
         ]
     ]
-).resize()
+).resize();
 
-module.exports.notificationsKb = notificationsKb
-module.exports.mainKb = mainKb
-module.exports.settingsKb = settingsKb
-module.exports.langKb = langKb
+module.exports.notificationsKb = notificationsKb;
+module.exports.mainKb = mainKb;
+module.exports.settingsKb = settingsKb;
+module.exports.langKb = langKb;
