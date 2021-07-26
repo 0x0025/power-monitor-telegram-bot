@@ -58,8 +58,148 @@ function update(data) {
     a1 = tempArr[9];
     a2 = tempArr[10];
     a3 = tempArr[11];
+
+    for(let uid in userData){
+        userData[uid].notif.forEach( (el,i)=>{
+            if (checkCondition(el)){
+                bot.telegram.sendMessage(uid, 'uvedomlenie');
+            }
+        });
+    }
 }
 
+function checkCondition(el){
+    switch(el.line){
+        case 0:
+            switch(el.VAWH){
+                case 0:
+                    if( (el.moreLess == 1) && (v1 > el.val || v2 > el.val || v3 > el.val) ){
+                        return 1;
+                    }else if((el.moreLess == 0) && (v1 < el.val || v2 < el.val || v3 < el.val)){
+                        return 1;
+                    }
+                    break;
+                case 1:
+                    if( (el.moreLess == 1) && (a1 > el.val || a2 > el.val || a3 > el.val) ){
+                        return 1;
+                    }else if((el.moreLess == 0) && (a1 < el.val || a2 < el.val || a3 < el.val)){
+                        return 1;
+                    }
+                    break;
+                case 2:
+                    if( (el.moreLess == 1) && (w1 > el.val || w2 > el.val || w3 > el.val) ){
+                        return 1;
+                    }else if((el.moreLess == 0) && (w1 < el.val || w2 < el.val || w3 < el.val)){
+                        return 1;
+                    }
+                    break;
+                case 3:
+                    if( (el.moreLess == 1) && (Wh1 > el.val || Wh2 > el.val || Wh3 > el.val) ){
+                        return 1;
+                    }else if((el.moreLess == 0) && (Wh1 < el.val || Wh2 < el.val || Wh3 < el.val)){
+                        return 1;
+                    }
+                    break;
+            }
+            break;
+        case 1:
+            switch(el.VAWH){
+                case 0:
+                    if ( (el.moreLess == 1) && (v1 > el.val)){
+                        return 1;
+                    }else if ( (el.moreLess == 0) && (v1 < el.val)){
+                        return 1;
+                    } 
+                    break;
+                case 1:
+                    if ( (el.moreLess == 1) && (a1 > el.val)){
+                        return 1;
+                    }else if ( (el.moreLess == 0) && (v1 < el.val)){
+                        return 1;
+                    } 
+                    break;
+                case 2:
+                    if ( (el.moreLess == 1) && (w1 > el.val)){
+                        return 1;
+                    }else if ( (el.moreLess == 0) && (v1 < el.val)){
+                        return 1;
+                    } 
+                    break;
+                case 3:
+                    if ( (el.moreLess == 1) && (Wh1 > el.val)){
+                        return 1;
+                    }else if ( (el.moreLess == 0) && (v1 < el.val)){
+                        return 1;
+                    } 
+                    break;
+            }
+            break;
+        case 2:
+            switch(el.VAWH){
+                case 0:
+                    if ( (el.moreLess == 1) && (v2 > el.val)){
+                        return 1;
+                    }else if ( (el.moreLess == 0) && (v2 < el.val)){
+                        return 1;
+                    } 
+                    break;
+                case 1:
+                    if ( (el.moreLess == 1) && (a2 > el.val)){
+                        return 1;
+                    }else if ( (el.moreLess == 0) && (v2 < el.val)){
+                        return 1;
+                    } 
+                    break;
+                case 2:
+                    if ( (el.moreLess == 1) && (w2 > el.val)){
+                        return 1;
+                    }else if ( (el.moreLess == 0) && (v2 < el.val)){
+                        return 1;
+                    } 
+                    break;
+                case 3:
+                    if ( (el.moreLess == 1) && (Wh2 > el.val)){
+                        return 1;
+                    }else if ( (el.moreLess == 0) && (v2 < el.val)){
+                        return 1;
+                    } 
+                    break;
+            }
+            break;
+        case 3:
+            switch(el.VAWH){
+                case 0:
+                    if ( (el.moreLess == 1) && (v3 > el.val)){
+                        return 1;
+                    }else if ( (el.moreLess == 0) && (v3 < el.val)){
+                        return 1;
+                    } 
+                    break;
+                case 1:
+                    if ( (el.moreLess == 1) && (a3 > el.val)){
+                        return 1;
+                    }else if ( (el.moreLess == 0) && (v3 < el.val)){
+                        return 1;
+                    } 
+                    break;
+                case 2:
+                    if ( (el.moreLess == 1) && (w3 > el.val)){
+                        return 1;
+                    }else if ( (el.moreLess == 0) && (v3 < el.val)){
+                        return 1;
+                    } 
+                    break;
+                case 3:
+                    if ( (el.moreLess == 1) && (Wh3 > el.val)){
+                        return 1;
+                    }else if ( (el.moreLess == 0) && (v3 < el.val)){
+                        return 1;
+                    } 
+                    break;
+            }
+            break;
+    }
+}
 
 serialPort.on("open", function () {
     console.log('Serialport open');
@@ -90,6 +230,7 @@ bot.start((ctx) => {
     var uid = ctx.from.id;
     Object.assign(userData, {
         [uid]:{
+            //chatId: ctx.from.
             state:0,
             settings:{
                 updateMsgTimeout: config.updateMsgTimeout
