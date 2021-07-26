@@ -40,6 +40,7 @@ const notifKb = Markup.keyboard(
     [
         [
             'Удалить',
+            'Список',
             'Добавить'
         ],
         [
@@ -59,7 +60,7 @@ const notifP1Kb = Markup.inlineKeyboard(
         ],[
             Markup.button.callback('3', 'P1L3')
         ],[
-            Markup.button.callback('Отмена', 'cancel')
+            Markup.button.callback('Отмена', 'notifAddCancel')
         ]
     ]
 );
@@ -75,7 +76,7 @@ const notifP2Kb = Markup.inlineKeyboard(
         ],[
             Markup.button.callback('Wh', 'P2Wh')
         ],[
-            Markup.button.callback('Отмена', 'notifCancel')
+            Markup.button.callback('Отмена', 'notifAddCancel')
         ]
     ]
 );
@@ -87,7 +88,7 @@ const notifP3Kb = Markup.inlineKeyboard(
         ],[
             Markup.button.callback('Меньше', 'P3Less')
         ],[
-            Markup.button.callback('Отмена', 'notifCancel')
+            Markup.button.callback('Отмена', 'notifAddCancel')
         ]
     ]
 );

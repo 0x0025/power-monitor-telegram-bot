@@ -265,14 +265,39 @@ bot.on('text',(ctx) => {
                         ctx.reply('Уведомить если по ___ фазе значение ___ больше/меньше ___', kb.notifP1Kb);
                         break;
 
+                    case 'Список':
+                        if(userData[uid].notif.length > 0){
+                            var replyStr = "";
+                            
+                            userData[uid].notif.forEach((el, i) => {
+                                if(el.moreLess == 1)
+                                    replyStr += `${i}. (${lineEnumTranslate(el.line)}) ${VAWHtranslate(el.VAWH)} > ${el.val} \n`;
+                                else 
+                                    replyStr += `${i}. (${lineEnumTranslate(el.line)}) ${VAWHtranslate(el.VAWH)} < ${el.val} \n`;
+                            });
+                            
+                            ctx.reply(replyStr);
+                        }else{
+                            ctx.reply('У вас нет уведомлений');
+                        }
+                        break;
+                    
                     case 'Удалить':
-                        var replyStr = "";
-                        //userData[uid].state = 9; //Тут потом удаление сделать
-                        userData[uid].notif.forEach(el => {
-                            replyStr += "Val " + el.val;
-                        });
-                        
-                        ctx.reply(replyStr, kb.notifDel);
+                        if(userData[uid].notif.length > 0){
+                            userData[uid].state = 9;
+                            var replyStr = "Выберите какое уведомление вы хотите удалить: \n";
+                            
+                            userData[uid].notif.forEach((el, i) => {
+                                if(el.moreLess == 1)
+                                    replyStr += `${i}. (${lineEnumTranslate(el.line)}) ${VAWHtranslate(el.VAWH)} > ${el.val} \n`;
+                                else 
+                                    replyStr += `${i}. (${lineEnumTranslate(el.line)}) ${VAWHtranslate(el.VAWH)} < ${el.val} \n`;
+                            });
+                            
+                            ctx.reply(replyStr, kb.notifDel);
+                        }else{
+                            ctx.reply('У вас нет уведомлений');
+                        }
                         break;
                 }
                 break;
@@ -285,10 +310,22 @@ bot.on('text',(ctx) => {
                     userData[uid].notif.push(tmpNotif);
                     userData[uid].state = 4;
                     userData[uid].notifTmp = {};
-                    ctx.reply('Настройки', kb.notifKb);
+                    ctx.reply('Уведомление Добавлено', kb.notifKb);
                 }else{
                     ctx.reply('Введите число больше 0');
                 }
+                break;
+
+            case 9:
+                var val = parseInt(txt); //parseFloat nado
+                if (val >= 0 && val <=  userData[uid].notif.length){
+                    userData[uid].notif.splice(val, 1);
+                    userData[uid].state = 4;
+                    ctx.reply('Уведомление удалено', kb.notifKb);
+                }else{
+                    ctx.reply('Введите корректное число');
+                }
+
                 break;
 
             default:
@@ -390,6 +427,32 @@ bot.action('notifDelCancel', (ctx) => {
     ctx.deleteMessage();
     userData[uid].state = 4;
 });
+
+function VAWHtranslate(num){
+    switch(num){
+        case 0:
+            return 'V';
+        case 1:
+            return 'A';
+        case 2:
+            return 'W';
+        case 3:
+            return 'Wh';
+    }
+}
+
+function lineEnumTranslate(num){ //По любому переделать
+    switch(num){
+        case 0:
+            return 'Любая фаза';
+        case 1:
+            return 'Фаза 1';
+        case 2:
+            return 'Фаза 2';
+        case 3:
+            return 'Фаза 3';
+    }
+}
 
 bot.launch();
 console.log('bot.launch');
