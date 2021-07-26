@@ -93,7 +93,8 @@ bot.start((ctx) => {
             state:0,
             settings:{
                 updateMsgTimeout: config.updateMsgTimeout
-            }
+            },
+            notif:[]
         }
     });
 
@@ -217,7 +218,7 @@ bot.on('text',(ctx) => {
 
                     case'Уведомления':
                         userData[uid].state = 4;
-                        ctx.reply('Настройка уведомлений', kb.notificationsKb);
+                        ctx.reply('Настройка уведомлений', kb.notifKb);
                         break;
 
                     case'Назад':
@@ -247,7 +248,7 @@ bot.on('text',(ctx) => {
                 if ((val < 500) && (val > 0)){
                     userData[uid].settings.updateMsgTimeout = val * 1000;
                     userData[uid].state = 1;
-                    ctx.reply('Настройки',kb.settingsKb);
+                    ctx.reply('Настройки', kb.settingsKb);
                 }else{
                     ctx.reply('Введите число не больше 500');
                 }
@@ -259,7 +260,34 @@ bot.on('text',(ctx) => {
                         userData[uid].state = 1;
                         ctx.reply('Настройки',kb.settingsKb);
                         break;
-                    
+                    case 'Добавить':
+                        userData[uid].state = 5;
+                        ctx.reply('Уведомить если по ___ фазе значение ___ больше/меньше ___', kb.notifP1Kb);
+                        break;
+
+                    case 'Удалить':
+                        var replyStr = "";
+                        //userData[uid].state = 9; //Тут потом удаление сделать
+                        userData[uid].notif.forEach(el => {
+                            replyStr += "Val " + el.val;
+                        });
+                        
+                        ctx.reply(replyStr, kb.notifDel);
+                        break;
+                }
+                break;
+
+            case 8:
+                var val = parseInt(txt); //parseFloat nado
+                if (val > 0){
+                    var tmpNotif = userData[uid].notifTmp;
+                    tmpNotif.val = val;
+                    userData[uid].notif.push(tmpNotif);
+                    userData[uid].state = 4;
+                    userData[uid].notifTmp = {};
+                    ctx.reply('Настройки', kb.notifKb);
+                }else{
+                    ctx.reply('Введите число больше 0');
                 }
                 break;
 
@@ -270,6 +298,97 @@ bot.on('text',(ctx) => {
     }catch(e){
         console.error(e);
     }
+});
+
+bot.action('P1Any', (ctx) => { //st5
+    var uid = ctx.from.id;
+    ctx.editMessageText('Уведомить если по любой фазе значение ___ больше/меньше ___', kb.notifP2Kb);
+    userData[uid].state = 6;
+    userData[uid].notifTmp = {
+        line: 0
+    };
+});
+
+bot.action('P1L1', (ctx) => {
+    var uid = ctx.from.id;
+    ctx.editMessageText('Уведомить если по 1 фазе значение ___ больше/меньше ___', kb.notifP2Kb);
+    userData[uid].state = 6;
+    userData[uid].notifTmp = {
+        line: 1
+    };
+});
+
+bot.action('P1L2', (ctx) => {
+    var uid = ctx.from.id;
+    ctx.editMessageText('Уведомить если по 2 фазе значение ___ больше/меньше ___', kb.notifP2Kb);
+    userData[uid].state = 6;
+    userData[uid].notifTmp = {
+        line: 2
+    };
+});
+
+bot.action('P1L3', (ctx) => {
+    var uid = ctx.from.id;
+    ctx.editMessageText('Уведомить если по 3 фазе значение ___ больше/меньше ___', kb.notifP2Kb);
+    userData[uid].state = 6;
+    userData[uid].notifTmp = {
+        line: 3
+    };
+});
+
+bot.action('P2V', (ctx) => { //st6
+    var uid = ctx.from.id;
+    ctx.editMessageText('Уведомить если по X фазе значение V больше/меньше ___', kb.notifP3Kb); //Сделать вместо Х
+    userData[uid].state = 7;
+    userData[uid].notifTmp.VAWH = 0;
+});
+
+bot.action('P2A', (ctx) => {
+    var uid = ctx.from.id;
+    ctx.editMessageText('Уведомить если по X фазе значение A больше/меньше ___', kb.notifP3Kb);
+    userData[uid].state = 7;
+    userData[uid].notifTmp.VAWH = 1;
+});
+
+bot.action('P2W', (ctx) => {
+    var uid = ctx.from.id;
+    ctx.editMessageText('Уведомить если по X фазе значение W больше/меньше ___', kb.notifP3Kb);
+    userData[uid].state = 7;
+    userData[uid].notifTmp.VAWH = 2;
+});
+
+bot.action('P2Wh', (ctx) => {
+    var uid = ctx.from.id;
+    ctx.editMessageText('Уведомить если по X фазе значение Wh больше/меньше ___', kb.notifP3Kb);
+    userData[uid].state = 7;
+    userData[uid].notifTmp.VAWH = 3;
+});
+
+bot.action('P3More', (ctx) => { //st7
+    var uid = ctx.from.id;
+    ctx.editMessageText('Уведомить если по X фазе значение X больше (Введите число)', kb.notifP4Kb);
+    userData[uid].state = 8;
+    userData[uid].notifTmp.moreLess = 1;
+});
+
+bot.action('P3Less', (ctx) => {
+    var uid = ctx.from.id;
+    ctx.editMessageText('Уведомить если по X фазе значение X меньше (Введите число)', kb.notifP4Kb);
+    userData[uid].state = 8;
+    userData[uid].notifTmp.moreLess = 0;
+});
+
+bot.action('notifAddCancel', (ctx) => {
+    var uid = ctx.from.id;
+    ctx.deleteMessage();
+    userData[uid].notifTmp = {};
+    userData[uid].state = 4;
+});
+
+bot.action('notifDelCancel', (ctx) => {
+    var uid = ctx.from.id;
+    ctx.deleteMessage();
+    userData[uid].state = 4;
 });
 
 bot.launch();
