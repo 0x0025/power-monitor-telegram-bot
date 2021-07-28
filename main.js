@@ -60,9 +60,33 @@ function update(data) {
     a3 = tempArr[11];
 
     for(let uid in userData){
-        userData[uid].notif.forEach( (el,i)=>{
+        userData[uid].notif.forEach( (el,i) => {
             if (checkCondition(el)){
-                bot.telegram.sendMessage(uid, 'uvedomlenie');
+                var replyStr = 'Уведомление сработало \n \n';
+
+                if(el.moreLess == 1)
+                    replyStr += `Значение ${VAWHtranslate(el.VAWH)} по ${lineEnumTranslate(el.line)} фазе превысило ${el.val}\n\n`;
+                else 
+                    replyStr += `Значение ${VAWHtranslate(el.VAWH)} по ${lineEnumTranslate(el.line)} фазе ниже ${el.val}\n\n`;
+                
+                replyStr += 'Фаза 1\n'+
+                `Напряжение: ${v1}V\n`+
+                `Сила тока: ${a1}A\n`+
+                `Мощность: ${w1}W\n`+
+                `Потребление: ${wh1}Wh\n\n`+
+                
+                'Фаза 2\n'+
+                `Напряжение: ${v2}V\n`+
+                `Сила тока: ${a2}A\n`+
+                `Мощность: ${w2}W\n`+
+                `Потребление: ${wh2}Wh\n\n`+
+                
+                'Фаза 3\n'+
+                `Напряжение: ${v3}V\n`+
+                `Сила тока: ${a3}A\n`+
+                `Мощность: ${w3}W\n`+
+                `Потребление: ${wh3}Wh\n`;
+                bot.telegram.sendMessage(uid, replyStr);
             }
         });
     }
