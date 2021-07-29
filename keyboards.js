@@ -20,7 +20,8 @@ function settingsKb(lang) {
                 loc.translate(lang, 'statusUpdTm')
             ],
             [
-                loc.translate(lang, 'notifications')
+                loc.translate(lang, 'notifications'),
+                loc.translate(lang, 'notifCD')
             ],
             [
                 loc.translate(lang, 'back')
@@ -80,13 +81,13 @@ function notifP2Kb(lang) {
     return Markup.inlineKeyboard(
         [    
             [
-                Markup.button.callback(loc.VAWHtranslate(lang, 0), 'P2V')
+                Markup.button.callback(loc.VAWHtranslate(lang, 0) + ' (V)', 'P2V')
             ],[
-                Markup.button.callback(loc.VAWHtranslate(lang, 1), 'P2A')
+                Markup.button.callback(loc.VAWHtranslate(lang, 1) + ' (A)', 'P2A')
             ],[
-                Markup.button.callback(loc.VAWHtranslate(lang, 2), 'P2W')
+                Markup.button.callback(loc.VAWHtranslate(lang, 2) + ' (W)', 'P2W')
             ],[
-                Markup.button.callback(loc.VAWHtranslate(lang, 3), 'P2Wh')
+                Markup.button.callback(loc.VAWHtranslate(lang, 3) + ' (Wh)', 'P2Wh')
             ],[
                 Markup.button.callback(loc.translate(lang, 'cancel'), 'notifAddCancel')
             ]

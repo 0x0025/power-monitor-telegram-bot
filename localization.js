@@ -36,7 +36,9 @@ const rus = {
     'gotNotification':'Уведомление сработало! \n \n',
     'notifLess': 'ниже',
     'notifMore': 'выше',
-    'anyLine': 'Одна из фаз'
+    'anyLine': 'Одна из фаз',
+    'notifCD':'Кулдаун уведомлений',
+    'anyLine2':'Любая фаза'
 };
 
 const eng = {
@@ -77,7 +79,9 @@ const eng = {
     'gotNotification':'Got notification! \n \n',
     'notifLess': 'is lower than',
     'notifMore': 'is higher than',
-    'anyLine': 'One of the lines'
+    'anyLine': 'One of the lines',
+    'notifCD':'Notifications cooldown',
+    'anyLine2':'Any line'
 };
 
 function translate(lang, str){

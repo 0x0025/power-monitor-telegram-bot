@@ -29,7 +29,7 @@ function writeUserData(){
     });
 }
 
-function tr(ctx, str){ ///Переделать все с этой хренью!!!!!!!!!!!!!!!!!
+function tr(ctx, str){ 
     return loc.translate(userData[ctx.from.id].lang, str)
 }
 
@@ -65,8 +65,8 @@ function update(data) {
     a3 = tempArr[11];
 
     for(let uid in userData){
-        userData[uid].notif.forEach( (el, i) => {
-            if (checkCondition(el)){
+        userData[uid].notif.forEach( (el) => {
+            if (checkCondition(el) && ( (Date.now() - el.timestamp) > userData[uid].notifCoolDown || el.timestamp === undefined)  ){
                 var replyStr = loc.translate(userData[uid].lang, 'gotNotification');
                 
                 if(el.line == 0){
@@ -80,7 +80,7 @@ function update(data) {
                     else 
                         replyStr += loc.VAWHtranslate(userData[uid].lang, el.VAWH) + '(' + loc.translate(userData[uid].lang, 'line') + ' ' + el.line + `) ${loc.translate(userData[uid].lang,'notifLess')} ${el.val}\n\n`;
                 }
-                replyStr += `${loc.translate(userData[uid].lang, 'line')} 1\n`+
+                replyStr += `${loc.translate(userData[uid].lang, 'line')} 1\n`+ //ПОТОМ НАДО ВЫДЕЛИТЬ ЖИРНЫМ ШРИФТОМ ПАРАМЕТР КОТОРЫЙ СРАБОТАЛ
                 `${loc.translate(userData[uid].lang, 'voltage')}: ${v1}V\n`+
                 `${loc.translate(userData[uid].lang, 'amperage')}: ${a1}A\n`+
                 `${loc.translate(userData[uid].lang, 'power')}: ${w1}W\n`+
@@ -99,8 +99,11 @@ function update(data) {
                 `${loc.translate(userData[uid].lang, 'energy')}: ${wh3}Wh\n`;
 
                 bot.telegram.sendMessage(uid, replyStr);
+                
+                el.timestamp = Date.now();
+                writeUserData();
             }
-        }, this);
+        });
     }
 }
  
@@ -270,6 +273,7 @@ bot.start((ctx) => {
             //chatId: ctx.from.
             state:0,
             updateMsgTimeout: config.updateMsgTimeout,
+            notifCoolDown: config.notificationCoolDown,
             lang : 0,
             notif:[]
         }
@@ -407,6 +411,13 @@ bot.on('text',(ctx) => {
                         userData[uid].state = 0;
                         ctx.reply(tr(ctx, 'mainMenu'), kb.mainKb(userData[uid].lang));
                         break;
+
+                        //НАДО СДЕЛАТЬ ДЕФоЛТ ЧТОБЫ ЕСЛИ ЧТО ОТПРАВЛЯЛ НОВУЮ КЛАВУ!!!!!!
+
+                    case tr(ctx, 'notifCD'):
+                        userData[uid].state = 10;
+                        ctx.reply(tr(ctx, 'enterNumSec'), Markup.removeKeyboard());
+                        break;
                 }
                 break;
             
@@ -456,11 +467,18 @@ bot.on('text',(ctx) => {
                             var replyStr = "";
                             
                             userData[uid].notif.forEach((el, i) => {
-                                if(el.moreLess == 1)
-                                    replyStr += `${i}. (${lineEnumTranslate(el.line)}) ${VAWHtranslate(el.VAWH)} > ${el.val} \n`;
-                                else 
-                                    replyStr += `${i}. (${lineEnumTranslate(el.line)}) ${VAWHtranslate(el.VAWH)} < ${el.val} \n`;
-                            }); 
+                                if (el.line == 0){
+                                    if(el.moreLess == 1)
+                                        replyStr += `${i}. (${tr(ctx, 'anyLine2')}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} > ${el.val} \n`;
+                                    else 
+                                        replyStr += `${i}. (${tr(ctx, 'anyLine2')}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} < ${el.val} \n`;
+                                }else{
+                                    if(el.moreLess == 1)
+                                        replyStr += `${i}. (${tr(ctx, 'line') + ' ' + el.line}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} > ${el.val} \n`;
+                                    else 
+                                        replyStr += `${i}. (${tr(ctx, 'line') + ' ' + el.line}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} < ${el.val} \n`;
+                                }
+                            });
                             
                             ctx.reply(replyStr);
                         }else{
@@ -474,10 +492,17 @@ bot.on('text',(ctx) => {
                             var replyStr = tr(ctx, 'chooseNotifToDel');
                             
                             userData[uid].notif.forEach((el, i) => {
-                                if(el.moreLess == 1)
-                                    replyStr += `${i}. (${lineEnumTranslate(el.line)}) ${VAWHtranslate(el.VAWH)} > ${el.val} \n`;
-                                else 
-                                    replyStr += `${i}. (${lineEnumTranslate(el.line)}) ${VAWHtranslate(el.VAWH)} < ${el.val} \n`;
+                                if (el.line == 0){
+                                    if(el.moreLess == 1)
+                                        replyStr += `${i}. (${tr(ctx, 'anyLine2')}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} > ${el.val} \n`;
+                                    else 
+                                        replyStr += `${i}. (${tr(ctx, 'anyLine2')}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} < ${el.val} \n`;
+                                }else{
+                                    if(el.moreLess == 1)
+                                        replyStr += `${i}. (${tr(ctx, 'line') + ' ' + el.line}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} > ${el.val} \n`;
+                                    else 
+                                        replyStr += `${i}. (${tr(ctx, 'line') + ' ' + el.line}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} < ${el.val} \n`;
+                                }
                             });
                             
                             ctx.reply(replyStr, kb.notifDel(userData[uid].lang));
@@ -494,6 +519,7 @@ bot.on('text',(ctx) => {
                     var tmpNotif = userData[uid].notifTmp;
                     delete tmpNotif.str;
                     tmpNotif.val = val;
+                    tmpNotif.timestamp = 0;
                     userData[uid].notif.push(tmpNotif);
                     userData[uid].state = 4;
                     userData[uid].notifTmp = {};
@@ -513,6 +539,17 @@ bot.on('text',(ctx) => {
                     ctx.reply(tr(ctx, 'enterCorrectNum'));
                 }
 
+                break;
+
+            case 10:
+                var val = parseInt(txt);
+                if ((val < 500) && (val > 0)){
+                    userData[uid].notifCoolDown = val * 1000;
+                    userData[uid].state = 1;
+                    ctx.reply(tr(ctx, 'settings'), kb.settingsKb(userData[uid].lang));
+                }else{
+                    ctx.reply(tr(ctx, 'enterCorrectNum'));
+                }
                 break;
 
             default:
