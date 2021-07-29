@@ -5,6 +5,7 @@ const fs = require('fs');
 
 var config = require('./config.json'); //Потом тоже чтение кфг сделать
 var kb = require('./keyboards.js');
+var loc = require('./localization.js');
 
 var v1, v2, v3;
 var w1, w2, w3;
@@ -26,6 +27,10 @@ function writeUserData(){
             return console.error(err);
         console.log('writeUserData()');
     });
+}
+
+function tr(ctx, str){ ///Переделать все с этой хренью!!!!!!!!!!!!!!!!!
+    return loc.translate(userData[ctx.from.id].lang, str)
 }
 
 setInterval(writeUserData, 30000);
@@ -60,37 +65,45 @@ function update(data) {
     a3 = tempArr[11];
 
     for(let uid in userData){
-        userData[uid].notif.forEach( (el,i) => {
+        userData[uid].notif.forEach( (el, i) => {
             if (checkCondition(el)){
-                var replyStr = 'Уведомление сработало \n \n';
+                var replyStr = loc.translate(userData[uid].lang, 'gotNotification');
+                
+                if(el.line == 0){
+                    if(el.moreLess == 1)
+                        replyStr += loc.VAWHtranslate(userData[uid].lang, el.VAWH) + '(' + loc.translate(userData[uid].lang, 'anyLine') +  `) ${loc.translate(userData[uid].lang,'notifMore')} ${el.val}\n\n`;
+                    else
+                        replyStr += loc.VAWHtranslate(userData[uid].lang, el.VAWH) + '(' + loc.translate(userData[uid].lang, 'anyLine') +  `) ${loc.translate(userData[uid].lang,'notifLess')} ${el.val}\n\n`;
+                }else {
+                    if(el.moreLess == 1)
+                        replyStr += loc.VAWHtranslate(userData[uid].lang, el.VAWH) + '(' + loc.translate(userData[uid].lang, 'line') + ' ' + el.line + `) ${loc.translate(userData[uid].lang,'notifMore')} ${el.val}\n\n`;
+                    else 
+                        replyStr += loc.VAWHtranslate(userData[uid].lang, el.VAWH) + '(' + loc.translate(userData[uid].lang, 'line') + ' ' + el.line + `) ${loc.translate(userData[uid].lang,'notifLess')} ${el.val}\n\n`;
+                }
+                replyStr += `${loc.translate(userData[uid].lang, 'line')} 1\n`+
+                `${loc.translate(userData[uid].lang, 'voltage')}: ${v1}V\n`+
+                `${loc.translate(userData[uid].lang, 'amperage')}: ${a1}A\n`+
+                `${loc.translate(userData[uid].lang, 'power')}: ${w1}W\n`+
+                `${loc.translate(userData[uid].lang, 'energy')}: ${wh1}Wh\n\n`+
+                
+                `${loc.translate(userData[uid].lang, 'line')} 2\n`+
+                `${loc.translate(userData[uid].lang, 'voltage')}: ${v2}V\n`+
+                `${loc.translate(userData[uid].lang, 'amperage')}: ${a2}A\n`+
+                `${loc.translate(userData[uid].lang, 'power')}: ${w2}W\n`+
+                `${loc.translate(userData[uid].lang, 'energy')}: ${wh2}Wh\n\n`+
+                
+                `${loc.translate(userData[uid].lang, 'line')} 3\n`+
+                `${loc.translate(userData[uid].lang, 'voltage')}: ${v3}V\n`+
+                `${loc.translate(userData[uid].lang, 'amperage')}: ${a3}A\n`+
+                `${loc.translate(userData[uid].lang, 'power')}: ${w3}W\n`+
+                `${loc.translate(userData[uid].lang, 'energy')}: ${wh3}Wh\n`;
 
-                if(el.moreLess == 1)
-                    replyStr += `Значение ${VAWHtranslate(el.VAWH)} по ${lineEnumTranslate(el.line)} фазе превысило ${el.val}\n\n`;
-                else 
-                    replyStr += `Значение ${VAWHtranslate(el.VAWH)} по ${lineEnumTranslate(el.line)} фазе ниже ${el.val}\n\n`;
-                
-                replyStr += 'Фаза 1\n'+
-                `Напряжение: ${v1}V\n`+
-                `Сила тока: ${a1}A\n`+
-                `Мощность: ${w1}W\n`+
-                `Потребление: ${wh1}Wh\n\n`+
-                
-                'Фаза 2\n'+
-                `Напряжение: ${v2}V\n`+
-                `Сила тока: ${a2}A\n`+
-                `Мощность: ${w2}W\n`+
-                `Потребление: ${wh2}Wh\n\n`+
-                
-                'Фаза 3\n'+
-                `Напряжение: ${v3}V\n`+
-                `Сила тока: ${a3}A\n`+
-                `Мощность: ${w3}W\n`+
-                `Потребление: ${wh3}Wh\n`;
                 bot.telegram.sendMessage(uid, replyStr);
             }
-        });
+        }, this);
     }
 }
+ 
 
 function checkCondition(el){
     switch(el.line){
@@ -256,14 +269,13 @@ bot.start((ctx) => {
         [uid]:{
             //chatId: ctx.from.
             state:0,
-            settings:{
-                updateMsgTimeout: config.updateMsgTimeout
-            },
+            updateMsgTimeout: config.updateMsgTimeout,
+            lang : 0,
             notif:[]
         }
     });
 
-    ctx.reply('Welcome', kb.mainKb);
+    ctx.reply(tr(ctx, 'welcome'), kb.mainKb(userData[uid].lang));
 });
 
 
@@ -275,7 +287,7 @@ bot.command('status', (ctx) => {
     var chat = ctx.update.message.chat;
     var msgId;
 
-    var duration = userData[uid].settings.updateMsgTimeout;
+    var duration = userData[uid].updateMsgTimeout;
     // if(userData[uid].settings.updateMsgTimeout <= 500){ //Норм проверку сделать
     //     duration = userData[uid].settings.updateMsgTimeout
     // }else{
@@ -286,48 +298,48 @@ bot.command('status', (ctx) => {
     var updateInterval;
     
     function replyStr() {
-        return 'Фаза 1\n'+
-        `Напряжение: ${v1}V\n`+
-        `Сила тока: ${a1}A\n`+
-        `Мощность: ${w1}W\n`+
-        `Потребление: ${wh1}Wh\n\n`+
+        return `${tr(ctx, 'line')} 1\n`+
+        `${tr(ctx, 'voltage')}: ${v1}V\n`+
+        `${tr(ctx, 'amperage')}: ${a1}A\n`+
+        `${tr(ctx, 'power')}: ${w1}W\n`+
+        `${tr(ctx, 'energy')}: ${wh1}Wh\n\n`+
         
-        'Фаза 2\n'+
-        `Напряжение: ${v2}V\n`+
-        `Сила тока: ${a2}A\n`+
-        `Мощность: ${w2}W\n`+
-        `Потребление: ${wh2}Wh\n\n`+
+        `${tr(ctx, 'line')} 2\n`+
+        `${tr(ctx, 'voltage')}: ${v2}V\n`+
+        `${tr(ctx, 'amperage')}: ${a2}A\n`+
+        `${tr(ctx, 'power')}: ${w2}W\n`+
+        `${tr(ctx, 'energy')}: ${wh2}Wh\n\n`+
         
-        'Фаза 3\n'+
-        `Напряжение: ${v3}V\n`+
-        `Сила тока: ${a3}A\n`+
-        `Мощность: ${w3}W\n`+
-        `Потребление: ${wh3}Wh\n`;
+        `${tr(ctx, 'line')} 3\n`+
+        `${tr(ctx, 'voltage')}: ${v3}V\n`+
+        `${tr(ctx, 'amperage')}: ${a3}A\n`+
+        `${tr(ctx, 'power')}: ${w3}W\n`+
+        `${tr(ctx, 'energy')}: ${wh3}Wh\n`;
     }
 
     if(serialPort.isOpen){
-        ctx.reply(replyStr() + `\nОбновление в реальном времени(${endsAfter/1000}с)\n`).then(
+        ctx.reply(replyStr() + `\n${tr(ctx, 'realtimeUpd')}(${endsAfter/1000 + tr(ctx, 'sec')})\n`).then(
             function(value) {
                 msgId = value.message_id;
             }, 
             function(reason) {
-                console.error('Не получилось отправить сообщение: ' + reason);
+                console.error("Couldn't send msg:" + reason);
                 //Выход сделать
             }
         );
     }else {
-        ctx.reply('Устройство считывания оффлайн \n \n Последние данные:\n' + replyStr());
+        ctx.reply(tr(ctx, 'deviceOffline') + replyStr());
         return;
     }
 
     function updateMsg(){
         endsAfter -= 1000;
-        bot.telegram.editMessageText(chat.id, msgId, undefined, replyStr() + `\nОбновление в реальном времени(${endsAfter/1000}с)\n`).then(
+        bot.telegram.editMessageText(chat.id, msgId, undefined, replyStr() + `\n${tr(ctx, 'realtimeUpd')}(${endsAfter/1000 + tr(ctx, 'sec')})\n`).then(
             function(value) {
                 msgId = value.message_id;
             }, 
             function(reason) {
-                console.error('Не получилось обновить сообщение: ' + reason);
+                console.error("Couldn't update msg: " + reason);
             }
         );
     }
@@ -349,6 +361,11 @@ bot.command('quit', (ctx) => {
     //Чето нада
 });
 
+bot.command('testLoc', (ctx) => {
+    ctx.reply( loc.translate(userData[ctx.from.id].lang,'notifAddPt1')  );
+});
+
+
 bot.on('text',(ctx) => {
     var txt = ctx.message.text;
     var uid = ctx.message.from.id;
@@ -360,35 +377,35 @@ bot.on('text',(ctx) => {
 
             case 0:
                 switch(txt){
-                    case 'Настройки':
+                    case tr(ctx, 'settings'):
                         userData[uid].state = 1;
-                        ctx.reply('Настройки',kb.settingsKb); //Надо найти как выслать клавиатуру без отправки текста
+                        ctx.reply(tr(ctx, 'settings'),kb.settingsKb(userData[uid].lang)); //Надо найти как выслать клавиатуру без отправки текста
                         break;
                     default:
                         break;
                 }
-                break;
+            break; 
 
             case 1:
                 switch(txt){
-                    case'Язык':
+                    case tr(ctx, 'lang'):
                         userData[uid].state = 2;
-                        ctx.reply('Настройка языка', kb.langKb);
+                        ctx.reply(tr(ctx, 'lang'), kb.langKb(userData[uid].lang));
                         break;
                     
-                    case'Таймаут обновления /status':
+                    case tr(ctx, 'statusUpdTm'):
                         userData[uid].state = 3;
-                        ctx.reply('Введите кол-во секунд', Markup.removeKeyboard());
+                        ctx.reply(tr(ctx, 'enterNumSec'), Markup.removeKeyboard());
                         break;
 
-                    case'Уведомления':
+                    case tr(ctx, 'notifications'):
                         userData[uid].state = 4;
-                        ctx.reply('Настройка уведомлений', kb.notifKb);
+                        ctx.reply(tr(ctx, 'notifSettings'), kb.notifKb(userData[uid].lang));
                         break;
 
-                    case'Назад':
+                    case tr(ctx, 'back'):
                         userData[uid].state = 0;
-                        ctx.reply('Главное меню', kb.mainKb);
+                        ctx.reply(tr(ctx, 'mainMenu'), kb.mainKb(userData[uid].lang));
                         break;
                 }
                 break;
@@ -396,14 +413,18 @@ bot.on('text',(ctx) => {
             case 2:
                 switch(txt){
                     case'Русский':
-                        userData[uid].settings.lang = 0;
+                        userData[uid].lang = 0;
                         break;
                     case'English':
-                        userData[uid].settings.lang = 1;
+                        userData[uid].lang = 1;
                         break;
-                    case'Назад':
+                    case 'Back':
                         userData[uid].state = 1;
-                        ctx.reply('Настройки',kb.settingsKb);
+                        ctx.reply(tr(ctx, 'settings'),kb.settingsKb(userData[uid].lang));
+                        break;
+                    case 'Назад':
+                        userData[uid].state = 1;
+                        ctx.reply(tr(ctx, 'settings'),kb.settingsKb(userData[uid].lang));
                         break;
                 }
                 break;
@@ -411,26 +432,26 @@ bot.on('text',(ctx) => {
             case 3:
                 var val = parseInt(txt);
                 if ((val < 500) && (val > 0)){
-                    userData[uid].settings.updateMsgTimeout = val * 1000;
+                    userData[uid].updateMsgTimeout = val * 1000;
                     userData[uid].state = 1;
-                    ctx.reply('Настройки', kb.settingsKb);
+                    ctx.reply(tr(ctx, 'settings'), kb.settingsKb(userData[uid].lang));
                 }else{
-                    ctx.reply('Введите число не больше 500');
+                    ctx.reply(tr(ctx, 'enterCorrectNum'));
                 }
                 break;
 
             case 4:
                 switch (txt){
-                    case 'Назад':
+                    case tr(ctx, 'back'):
                         userData[uid].state = 1;
-                        ctx.reply('Настройки',kb.settingsKb);
+                        ctx.reply(tr(ctx, 'settings'),kb.settingsKb(userData[uid].lang));
                         break;
-                    case 'Добавить':
+                    case tr(ctx, 'add'):
                         userData[uid].state = 5;
-                        ctx.reply('Уведомить если по ___ фазе значение ___ больше/меньше ___', kb.notifP1Kb);
+                        ctx.reply(`${tr(ctx,'notifAddPt1')}___${tr(ctx,'notifAddPt2')}___${tr(ctx,'notifAddPt3')}___`, kb.notifP1Kb(userData[uid].lang));
                         break;
 
-                    case 'Список':
+                    case tr(ctx, 'list'):
                         if(userData[uid].notif.length > 0){
                             var replyStr = "";
                             
@@ -439,18 +460,18 @@ bot.on('text',(ctx) => {
                                     replyStr += `${i}. (${lineEnumTranslate(el.line)}) ${VAWHtranslate(el.VAWH)} > ${el.val} \n`;
                                 else 
                                     replyStr += `${i}. (${lineEnumTranslate(el.line)}) ${VAWHtranslate(el.VAWH)} < ${el.val} \n`;
-                            });
+                            }); 
                             
                             ctx.reply(replyStr);
                         }else{
-                            ctx.reply('У вас нет уведомлений');
+                            ctx.reply(tr(ctx, 'noNotif'));
                         }
                         break;
-                    
-                    case 'Удалить':
+                     
+                    case tr(ctx, 'del'):
                         if(userData[uid].notif.length > 0){
                             userData[uid].state = 9;
-                            var replyStr = "Выберите какое уведомление вы хотите удалить: \n";
+                            var replyStr = tr(ctx, 'chooseNotifToDel');
                             
                             userData[uid].notif.forEach((el, i) => {
                                 if(el.moreLess == 1)
@@ -459,9 +480,9 @@ bot.on('text',(ctx) => {
                                     replyStr += `${i}. (${lineEnumTranslate(el.line)}) ${VAWHtranslate(el.VAWH)} < ${el.val} \n`;
                             });
                             
-                            ctx.reply(replyStr, kb.notifDel);
+                            ctx.reply(replyStr, kb.notifDel(userData[uid].lang));
                         }else{
-                            ctx.reply('У вас нет уведомлений');
+                            ctx.reply(tr(ctx, 'noNotif'));
                         }
                         break;
                 }
@@ -471,13 +492,14 @@ bot.on('text',(ctx) => {
                 var val = parseInt(txt); //parseFloat nado
                 if (val > 0){
                     var tmpNotif = userData[uid].notifTmp;
+                    delete tmpNotif.str;
                     tmpNotif.val = val;
                     userData[uid].notif.push(tmpNotif);
                     userData[uid].state = 4;
                     userData[uid].notifTmp = {};
-                    ctx.reply('Уведомление Добавлено', kb.notifKb);
+                    ctx.reply(tr(ctx, 'notifAdded'), kb.notifKb(userData[uid].lang));
                 }else{
-                    ctx.reply('Введите число больше 0');
+                    ctx.reply(tr(ctx, 'enterCorrectNumMore0'));
                 }
                 break;
 
@@ -486,9 +508,9 @@ bot.on('text',(ctx) => {
                 if (val >= 0 && val <=  userData[uid].notif.length){
                     userData[uid].notif.splice(val, 1);
                     userData[uid].state = 4;
-                    ctx.reply('Уведомление удалено', kb.notifKb);
+                    ctx.reply(tr(ctx, 'notifDeleted'), kb.notifKb(userData[uid].lang));
                 }else{
-                    ctx.reply('Введите корректное число');
+                    ctx.reply(tr(ctx, 'enterCorrectNum'));
                 }
 
                 break;
@@ -504,78 +526,104 @@ bot.on('text',(ctx) => {
 
 bot.action('P1Any', (ctx) => { //st5
     var uid = ctx.from.id;
-    ctx.editMessageText('Уведомить если по любой фазе значение ___ больше/меньше ___', kb.notifP2Kb);
+    var str = tr(ctx,'notifAddPt1')+
+    tr(ctx,'any').toLowerCase()+
+    tr(ctx,'notifAddPt2');
+
+    ctx.editMessageText(str + '___' + tr(ctx,'notifAddPt3') + '___' , kb.notifP2Kb(userData[uid].lang));
     userData[uid].state = 6;
     userData[uid].notifTmp = {
-        line: 0
+        line: 0,
+        str: str
     };
 });
 
 bot.action('P1L1', (ctx) => {
     var uid = ctx.from.id;
-    ctx.editMessageText('Уведомить если по 1 фазе значение ___ больше/меньше ___', kb.notifP2Kb);
+    var str = tr(ctx,'notifAddPt1')+
+    '1'+
+    tr(ctx,'notifAddPt2');
+
+    ctx.editMessageText(str + '___' + tr(ctx,'notifAddPt3') + '___', kb.notifP2Kb(userData[uid].lang));
     userData[uid].state = 6;
     userData[uid].notifTmp = {
-        line: 1
+        line: 1,
+        str: str
     };
 });
 
 bot.action('P1L2', (ctx) => {
     var uid = ctx.from.id;
-    ctx.editMessageText('Уведомить если по 2 фазе значение ___ больше/меньше ___', kb.notifP2Kb);
+    var str = tr(ctx,'notifAddPt1')+
+    '2'+
+    tr(ctx,'notifAddPt2');
+
+    ctx.editMessageText(str + '___' + tr(ctx,'notifAddPt3') + '___', kb.notifP2Kb(userData[uid].lang));
     userData[uid].state = 6;
     userData[uid].notifTmp = {
-        line: 2
+        line: 2,
+        str: str
     };
 });
 
 bot.action('P1L3', (ctx) => {
     var uid = ctx.from.id;
-    ctx.editMessageText('Уведомить если по 3 фазе значение ___ больше/меньше ___', kb.notifP2Kb);
+    var str = tr(ctx,'notifAddPt1')+
+    '3'+
+    tr(ctx,'notifAddPt2');
+
+    ctx.editMessageText(str + '___' + tr(ctx,'notifAddPt3') + '___', kb.notifP2Kb(userData[uid].lang));
     userData[uid].state = 6;
     userData[uid].notifTmp = {
-        line: 3
+        line: 3,
+        str: str
     };
 });
 
 bot.action('P2V', (ctx) => { //st6
     var uid = ctx.from.id;
-    ctx.editMessageText('Уведомить если по X фазе значение V больше/меньше ___', kb.notifP3Kb); //Сделать вместо Х
+    userData[uid].notifTmp.str += tr(ctx, 'voltage'); 
+    ctx.editMessageText(userData[uid].notifTmp.str + tr(ctx,'notifAddPt3') + '___', kb.notifP3Kb(userData[uid].lang)); //Сделать вместо Х
     userData[uid].state = 7;
     userData[uid].notifTmp.VAWH = 0;
 });
 
 bot.action('P2A', (ctx) => {
     var uid = ctx.from.id;
-    ctx.editMessageText('Уведомить если по X фазе значение A больше/меньше ___', kb.notifP3Kb);
+    userData[uid].notifTmp.str += tr(ctx, 'amperage');
+    ctx.editMessageText(userData[uid].notifTmp.str + tr(ctx,'notifAddPt3') + '___', kb.notifP3Kb(userData[uid].lang));
     userData[uid].state = 7;
     userData[uid].notifTmp.VAWH = 1;
 });
 
 bot.action('P2W', (ctx) => {
     var uid = ctx.from.id;
-    ctx.editMessageText('Уведомить если по X фазе значение W больше/меньше ___', kb.notifP3Kb);
+    userData[uid].notifTmp.str += tr(ctx, 'power');
+    ctx.editMessageText(userData[uid].notifTmp.str + tr(ctx,'notifAddPt3') + '___', kb.notifP3Kb(userData[uid].lang));
     userData[uid].state = 7;
     userData[uid].notifTmp.VAWH = 2;
 });
 
 bot.action('P2Wh', (ctx) => {
     var uid = ctx.from.id;
-    ctx.editMessageText('Уведомить если по X фазе значение Wh больше/меньше ___', kb.notifP3Kb);
+    userData[uid].notifTmp.str += tr(ctx, 'energy');
+    ctx.editMessageText(userData[uid].notifTmp.str + tr(ctx,'notifAddPt3') + '___', kb.notifP3Kb(userData[uid].lang));
     userData[uid].state = 7;
     userData[uid].notifTmp.VAWH = 3;
-});
+}); //tr(ctx
 
 bot.action('P3More', (ctx) => { //st7
     var uid = ctx.from.id;
-    ctx.editMessageText('Уведомить если по X фазе значение X больше (Введите число)', kb.notifP4Kb);
+    userData[uid].notifTmp.str += ' ' + tr(ctx, 'more').toLowerCase() + ' ';
+    ctx.editMessageText(userData[uid].notifTmp.str + '('+ tr(ctx, 'enterANum') +')', kb.notifP4Kb(userData[uid].lang));
     userData[uid].state = 8;
     userData[uid].notifTmp.moreLess = 1;
 });
 
 bot.action('P3Less', (ctx) => {
     var uid = ctx.from.id;
-    ctx.editMessageText('Уведомить если по X фазе значение X меньше (Введите число)', kb.notifP4Kb);
+    userData[uid].notifTmp.str += ' ' + tr(ctx, 'less').toLowerCase() + ' ';
+    ctx.editMessageText(userData[uid].notifTmp.str + '('+ tr(ctx, 'enterANum') +')', kb.notifP4Kb(userData[uid].lang));
     userData[uid].state = 8;
     userData[uid].notifTmp.moreLess = 0;
 });
