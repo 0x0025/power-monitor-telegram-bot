@@ -8,9 +8,10 @@ var kb = require('./keyboards.js');
 var loc = require('./localization.js');
 
 var v1, v2, v3;
+var a1, a2, a3;
 var w1, w2, w3;
 var wh1, wh2, wh3;
-var a1, a2, a3;
+
 
 var userData = {};
 
@@ -30,7 +31,7 @@ function writeUserData(){
 }
 
 function tr(ctx, str){ 
-    return loc.translate(userData[ctx.from.id].lang, str)
+    return loc.translate(userData[ctx.from.id].lang, str);
 }
 
 setInterval(writeUserData, 30000);
@@ -48,21 +49,22 @@ function update(data) {
 
     var tempArr = data.split(';'); //TODO: Эту хрень переделать
 
-    v1 = tempArr[0];     //TODO: Надо проверить как ведет себя с не целыми значениями
-    v2 = tempArr[1];
-    v3 = tempArr[2];
+    v1 = parseFloat(tempArr[0]);     //TODO: Надо проверить как ведет себя с не целыми значениями
+    v2 = parseFloat(tempArr[1]);
+    v3 = parseFloat(tempArr[2]);
 
-    w1 = tempArr[3];
-    w2 = tempArr[4];
-    w3 = tempArr[5];
+    a1 = parseFloat(tempArr[3]);
+    a2 = parseFloat(tempArr[4]);
+    a3 = parseFloat(tempArr[5]);
 
-    wh1 = tempArr[6];
-    wh2 = tempArr[7];
-    wh3 = tempArr[8];
+    w1 = parseFloat(tempArr[6]);    
+    w2 = parseFloat(tempArr[7]);
+    w3 = parseFloat(tempArr[8]);
 
-    a1 = tempArr[9];
-    a2 = tempArr[10];
-    a3 = tempArr[11];
+    wh1 = parseFloat(tempArr[9]);
+    wh2 = parseFloat(tempArr[10]);
+    wh3 = parseFloat(tempArr[11]);
+
 
     for(let uid in userData){
         userData[uid].notif.forEach( (el) => {
@@ -98,7 +100,7 @@ function update(data) {
                 `${loc.translate(userData[uid].lang, 'power')}: ${w3}W\n`+
                 `${loc.translate(userData[uid].lang, 'energy')}: ${wh3}Wh\n`;
 
-                bot.telegram.sendMessage(uid, replyStr);
+                bot.telegram.sendMessage(uid, replyStr, { parse_mode: 'MarkdownV2' });
                 
                 el.timestamp = Date.now();
                 writeUserData();
@@ -154,21 +156,21 @@ function checkCondition(el){
                 case 1:
                     if ( (el.moreLess == 1) && (a1 > el.val)){
                         return 1;
-                    }else if ( (el.moreLess == 0) && (v1 < el.val)){
+                    }else if ( (el.moreLess == 0) && (a1 < el.val)){
                         return 1;
                     } 
                     break;
                 case 2:
                     if ( (el.moreLess == 1) && (w1 > el.val)){
                         return 1;
-                    }else if ( (el.moreLess == 0) && (v1 < el.val)){
+                    }else if ( (el.moreLess == 0) && (w1 < el.val)){
                         return 1;
                     } 
                     break;
                 case 3:
                     if ( (el.moreLess == 1) && (Wh1 > el.val)){
                         return 1;
-                    }else if ( (el.moreLess == 0) && (v1 < el.val)){
+                    }else if ( (el.moreLess == 0) && (Wh1 < el.val)){
                         return 1;
                     } 
                     break;
@@ -186,21 +188,21 @@ function checkCondition(el){
                 case 1:
                     if ( (el.moreLess == 1) && (a2 > el.val)){
                         return 1;
-                    }else if ( (el.moreLess == 0) && (v2 < el.val)){
+                    }else if ( (el.moreLess == 0) && (a2 < el.val)){
                         return 1;
                     } 
                     break;
                 case 2:
                     if ( (el.moreLess == 1) && (w2 > el.val)){
                         return 1;
-                    }else if ( (el.moreLess == 0) && (v2 < el.val)){
+                    }else if ( (el.moreLess == 0) && (w2 < el.val)){
                         return 1;
                     } 
                     break;
                 case 3:
                     if ( (el.moreLess == 1) && (Wh2 > el.val)){
                         return 1;
-                    }else if ( (el.moreLess == 0) && (v2 < el.val)){
+                    }else if ( (el.moreLess == 0) && (Wh2 < el.val)){
                         return 1;
                     } 
                     break;
@@ -218,21 +220,21 @@ function checkCondition(el){
                 case 1:
                     if ( (el.moreLess == 1) && (a3 > el.val)){
                         return 1;
-                    }else if ( (el.moreLess == 0) && (v3 < el.val)){
+                    }else if ( (el.moreLess == 0) && (a3 < el.val)){
                         return 1;
                     } 
                     break;
                 case 2:
                     if ( (el.moreLess == 1) && (w3 > el.val)){
                         return 1;
-                    }else if ( (el.moreLess == 0) && (v3 < el.val)){
+                    }else if ( (el.moreLess == 0) && (w3 < el.val)){
                         return 1;
                     } 
                     break;
                 case 3:
                     if ( (el.moreLess == 1) && (Wh3 > el.val)){
                         return 1;
-                    }else if ( (el.moreLess == 0) && (v3 < el.val)){
+                    }else if ( (el.moreLess == 0) && (Wh3 < el.val)){
                         return 1;
                     } 
                     break;
@@ -270,7 +272,6 @@ bot.start((ctx) => {
     var uid = ctx.from.id;
     Object.assign(userData, {
         [uid]:{
-            //chatId: ctx.from.
             state:0,
             updateMsgTimeout: config.updateMsgTimeout,
             notifCoolDown: config.notificationCoolDown,
@@ -291,13 +292,7 @@ bot.command('status', (ctx) => {
     var chat = ctx.update.message.chat;
     var msgId;
 
-    var duration = userData[uid].updateMsgTimeout;
-    // if(userData[uid].settings.updateMsgTimeout <= 500){ //Норм проверку сделать
-    //     duration = userData[uid].settings.updateMsgTimeout
-    // }else{
-    //     duration = 10000
-    // }
-
+    var duration = userData[uid].updateMsgTimeout; //TODOНорм проверку сделать
     var endsAfter = duration;
     var updateInterval;
     
@@ -412,7 +407,7 @@ bot.on('text',(ctx) => {
                         ctx.reply(tr(ctx, 'mainMenu'), kb.mainKb(userData[uid].lang));
                         break;
 
-                        //НАДО СДЕЛАТЬ ДЕФоЛТ ЧТОБЫ ЕСЛИ ЧТО ОТПРАВЛЯЛ НОВУЮ КЛАВУ!!!!!!
+                        //TODO НАДО СДЕЛАТЬ ДЕФоЛТ ЧТОБЫ ЕСЛИ ЧТО ОТПРАВЛЯЛ НОВУЮ КЛАВУ!!!!!!
 
                     case tr(ctx, 'notifCD'):
                         userData[uid].state = 10;
@@ -514,7 +509,7 @@ bot.on('text',(ctx) => {
                 break;
 
             case 8:
-                var val = parseInt(txt); //parseFloat nado
+                var val = parseInt(txt); //TODO parseFloat nado
                 if (val > 0){
                     var tmpNotif = userData[uid].notifTmp;
                     delete tmpNotif.str;
@@ -678,38 +673,13 @@ bot.action('notifDelCancel', (ctx) => {
     userData[uid].state = 4;
 });
 
-function VAWHtranslate(num){
-    switch(num){
-        case 0:
-            return 'V';
-        case 1:
-            return 'A';
-        case 2:
-            return 'W';
-        case 3:
-            return 'Wh';
-    }
-}
-
-function lineEnumTranslate(num){ //По любому переделать
-    switch(num){
-        case 0:
-            return 'Любая фаза';
-        case 1:
-            return 'Фаза 1';
-        case 2:
-            return 'Фаза 2';
-        case 3:
-            return 'Фаза 3';
-    }
-}
 
 bot.launch();
 console.log('bot.launch');
 
 process.once('SIGINT', () => {
     bot.stop('SIGINT');
-    serialPort.close(); //UserData
+    serialPort.close(); //TODO UserData сохранить
     console.log('bot.stop');
     process.exit();
 });  
