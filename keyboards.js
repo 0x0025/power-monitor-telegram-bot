@@ -48,9 +48,9 @@ function notifKb(lang){
     return Markup.keyboard(
         [
             [
-                loc.translate(lang, 'del'),
+                loc.translate(lang, 'add'),
                 loc.translate(lang, 'list'),
-                loc.translate(lang, 'add')
+                loc.translate(lang, 'del'),                
             ],
             [
                 loc.translate(lang, 'back')
@@ -87,7 +87,7 @@ function notifP2Kb(lang) {
             ],[
                 Markup.button.callback(loc.VAWHtranslate(lang, 2) + ' (W)', 'P2W')
             ],[
-                Markup.button.callback(loc.VAWHtranslate(lang, 3) + ' (Wh)', 'P2Wh')
+                Markup.button.callback(loc.VAWHtranslate(lang, 3) + ' (kWh)', 'P2kWh')
             ],[
                 Markup.button.callback(loc.translate(lang, 'cancel'), 'notifAddCancel')
             ]

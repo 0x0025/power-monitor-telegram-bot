@@ -10,7 +10,7 @@ var loc = require('./localization.js');
 var v1, v2, v3;
 var a1, a2, a3;
 var w1, w2, w3;
-var wh1, wh2, wh3;
+var kwh1, kwh2, kwh3;
 
 
 var userData = {};
@@ -61,9 +61,9 @@ function update(data) {
     w2 = parseFloat(tempArr[7]);
     w3 = parseFloat(tempArr[8]);
 
-    wh1 = parseFloat(tempArr[9]);
-    wh2 = parseFloat(tempArr[10]);
-    wh3 = parseFloat(tempArr[11]);
+    kwh1 = parseFloat(tempArr[9]);
+    kwh2 = parseFloat(tempArr[10]);
+    kwh3 = parseFloat(tempArr[11]);
 
 
     for(let uid in userData){
@@ -86,21 +86,21 @@ function update(data) {
                 `${loc.translate(userData[uid].lang, 'voltage')}: ${v1}V\n`+
                 `${loc.translate(userData[uid].lang, 'amperage')}: ${a1}A\n`+
                 `${loc.translate(userData[uid].lang, 'power')}: ${w1}W\n`+
-                `${loc.translate(userData[uid].lang, 'energy')}: ${wh1}Wh\n\n`+
+                `${loc.translate(userData[uid].lang, 'energy')}: ${kwh1}kWh\n\n`+
                 
                 `${loc.translate(userData[uid].lang, 'line')} 2\n`+
                 `${loc.translate(userData[uid].lang, 'voltage')}: ${v2}V\n`+
                 `${loc.translate(userData[uid].lang, 'amperage')}: ${a2}A\n`+
                 `${loc.translate(userData[uid].lang, 'power')}: ${w2}W\n`+
-                `${loc.translate(userData[uid].lang, 'energy')}: ${wh2}Wh\n\n`+
+                `${loc.translate(userData[uid].lang, 'energy')}: ${kwh2}kWh\n\n`+
                 
                 `${loc.translate(userData[uid].lang, 'line')} 3\n`+
                 `${loc.translate(userData[uid].lang, 'voltage')}: ${v3}V\n`+
                 `${loc.translate(userData[uid].lang, 'amperage')}: ${a3}A\n`+
                 `${loc.translate(userData[uid].lang, 'power')}: ${w3}W\n`+
-                `${loc.translate(userData[uid].lang, 'energy')}: ${wh3}Wh\n`;
+                `${loc.translate(userData[uid].lang, 'energy')}: ${kwh3}kWh\n`;
 
-                bot.telegram.sendMessage(uid, replyStr, { parse_mode: 'MarkdownV2' });
+                bot.telegram.sendMessage(uid, replyStr);
                 
                 el.timestamp = Date.now();
                 writeUserData();
@@ -136,9 +136,9 @@ function checkCondition(el){
                     }
                     break;
                 case 3:
-                    if( (el.moreLess == 1) && (Wh1 > el.val || Wh2 > el.val || Wh3 > el.val) ){
+                    if( (el.moreLess == 1) && (kwh1 > el.val || kwh2 > el.val || kwh3 > el.val) ){
                         return 1;
-                    }else if((el.moreLess == 0) && (Wh1 < el.val || Wh2 < el.val || Wh3 < el.val)){
+                    }else if((el.moreLess == 0) && (kwh1 < el.val || kwh2 < el.val || kwh3 < el.val)){
                         return 1;
                     }
                     break;
@@ -168,9 +168,9 @@ function checkCondition(el){
                     } 
                     break;
                 case 3:
-                    if ( (el.moreLess == 1) && (Wh1 > el.val)){
+                    if ( (el.moreLess == 1) && (kwh1 > el.val)){
                         return 1;
-                    }else if ( (el.moreLess == 0) && (Wh1 < el.val)){
+                    }else if ( (el.moreLess == 0) && (kwh1 < el.val)){
                         return 1;
                     } 
                     break;
@@ -200,9 +200,9 @@ function checkCondition(el){
                     } 
                     break;
                 case 3:
-                    if ( (el.moreLess == 1) && (Wh2 > el.val)){
+                    if ( (el.moreLess == 1) && (kwh2 > el.val)){
                         return 1;
-                    }else if ( (el.moreLess == 0) && (Wh2 < el.val)){
+                    }else if ( (el.moreLess == 0) && (kwh2 < el.val)){
                         return 1;
                     } 
                     break;
@@ -232,9 +232,9 @@ function checkCondition(el){
                     } 
                     break;
                 case 3:
-                    if ( (el.moreLess == 1) && (Wh3 > el.val)){
+                    if ( (el.moreLess == 1) && (kwh3 > el.val)){
                         return 1;
-                    }else if ( (el.moreLess == 0) && (Wh3 < el.val)){
+                    }else if ( (el.moreLess == 0) && (kwh3 < el.val)){
                         return 1;
                     } 
                     break;
@@ -301,19 +301,19 @@ bot.command('status', (ctx) => {
         `${tr(ctx, 'voltage')}: ${v1}V\n`+
         `${tr(ctx, 'amperage')}: ${a1}A\n`+
         `${tr(ctx, 'power')}: ${w1}W\n`+
-        `${tr(ctx, 'energy')}: ${wh1}Wh\n\n`+
+        `${tr(ctx, 'energy')}: ${kwh1}kWh\n\n`+
         
         `${tr(ctx, 'line')} 2\n`+
         `${tr(ctx, 'voltage')}: ${v2}V\n`+
         `${tr(ctx, 'amperage')}: ${a2}A\n`+
         `${tr(ctx, 'power')}: ${w2}W\n`+
-        `${tr(ctx, 'energy')}: ${wh2}Wh\n\n`+
+        `${tr(ctx, 'energy')}: ${kwh2}kWh\n\n`+
         
         `${tr(ctx, 'line')} 3\n`+
         `${tr(ctx, 'voltage')}: ${v3}V\n`+
         `${tr(ctx, 'amperage')}: ${a3}A\n`+
         `${tr(ctx, 'power')}: ${w3}W\n`+
-        `${tr(ctx, 'energy')}: ${wh3}Wh\n`;
+        `${tr(ctx, 'energy')}: ${kwh3}kWh\n`;
     }
 
     if(serialPort.isOpen){
@@ -636,13 +636,13 @@ bot.action('P2W', (ctx) => {
     userData[uid].notifTmp.VAWH = 2;
 });
 
-bot.action('P2Wh', (ctx) => {
+bot.action('P2kWh', (ctx) => {
     var uid = ctx.from.id;
     userData[uid].notifTmp.str += tr(ctx, 'energy');
     ctx.editMessageText(userData[uid].notifTmp.str + tr(ctx,'notifAddPt3') + '___', kb.notifP3Kb(userData[uid].lang));
     userData[uid].state = 7;
     userData[uid].notifTmp.VAWH = 3;
-}); //tr(ctx
+}); 
 
 bot.action('P3More', (ctx) => { //st7
     var uid = ctx.from.id;
