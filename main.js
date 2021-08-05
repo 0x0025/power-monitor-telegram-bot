@@ -38,7 +38,7 @@ setInterval(writeUserData, 30000);
 readUserData();
 
 var portOpenRetry;
-var serialPort = new SerialPort(config.serialPort, { //TODO: Авто определение порта
+var serialPort = new SerialPort(config.serialPort, { 
     baudRate: config.baudRate,
     parser: new SerialPort.parsers.Readline("\n"),
     autoOpen: true
@@ -49,7 +49,7 @@ function update(data) {
 
     var tempArr = data.split(';'); //TODO: Эту хрень переделать
 
-    v1 = parseFloat(tempArr[0]);     //TODO: Надо проверить как ведет себя с не целыми значениями
+    v1 = parseFloat(tempArr[0]);
     v2 = parseFloat(tempArr[1]);
     v3 = parseFloat(tempArr[2]);
 
@@ -289,10 +289,11 @@ bot.command('status', (ctx) => {
     console.log('/status');
     
     var uid = ctx.message.from.id;
+    checkUid(uid, ctx);
     var chat = ctx.update.message.chat;
     var msgId;
 
-    var duration = userData[uid].updateMsgTimeout; //TODOНорм проверку сделать
+    var duration = userData[uid].updateMsgTimeout;     
     var endsAfter = duration;
     var updateInterval;
     
@@ -360,15 +361,11 @@ bot.command('quit', (ctx) => {
     //Чето нада
 });
 
-bot.command('testLoc', (ctx) => {
-    ctx.reply( loc.translate(userData[ctx.from.id].lang,'notifAddPt1')  );
-});
-
 
 bot.on('text',(ctx) => {
     var txt = ctx.message.text;
     var uid = ctx.message.from.id;
-
+    checkUid(uid, ctx);
     console.log(userData[uid].state);
 
     try{
@@ -452,6 +449,7 @@ bot.on('text',(ctx) => {
                         userData[uid].state = 1;
                         ctx.reply(tr(ctx, 'settings'),kb.settingsKb(userData[uid].lang));
                         break;
+
                     case tr(ctx, 'add'):
                         userData[uid].state = 5;
                         ctx.reply(`${tr(ctx,'notifAddPt1')}___${tr(ctx,'notifAddPt2')}___${tr(ctx,'notifAddPt3')}___`, kb.notifP1Kb(userData[uid].lang));
@@ -464,14 +462,14 @@ bot.on('text',(ctx) => {
                             userData[uid].notif.forEach((el, i) => {
                                 if (el.line == 0){
                                     if(el.moreLess == 1)
-                                        replyStr += `${i}. (${tr(ctx, 'anyLine2')}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} > ${el.val} \n`;
+                                        replyStr += `${i+1}. (${tr(ctx, 'anyLine2')}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} > ${el.val} \n`;
                                     else 
-                                        replyStr += `${i}. (${tr(ctx, 'anyLine2')}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} < ${el.val} \n`;
+                                        replyStr += `${i+1}. (${tr(ctx, 'anyLine2')}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} < ${el.val} \n`;
                                 }else{
                                     if(el.moreLess == 1)
-                                        replyStr += `${i}. (${tr(ctx, 'line') + ' ' + el.line}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} > ${el.val} \n`;
+                                        replyStr += `${i+1}. (${tr(ctx, 'line') + ' ' + el.line}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} > ${el.val} \n`;
                                     else 
-                                        replyStr += `${i}. (${tr(ctx, 'line') + ' ' + el.line}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} < ${el.val} \n`;
+                                        replyStr += `${i+1}. (${tr(ctx, 'line') + ' ' + el.line}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} < ${el.val} \n`;
                                 }
                             });
                             
@@ -489,14 +487,14 @@ bot.on('text',(ctx) => {
                             userData[uid].notif.forEach((el, i) => {
                                 if (el.line == 0){
                                     if(el.moreLess == 1)
-                                        replyStr += `${i}. (${tr(ctx, 'anyLine2')}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} > ${el.val} \n`;
+                                        replyStr += `${i+1}. (${tr(ctx, 'anyLine2')}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} > ${el.val} \n`;
                                     else 
-                                        replyStr += `${i}. (${tr(ctx, 'anyLine2')}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} < ${el.val} \n`;
+                                        replyStr += `${i+1}. (${tr(ctx, 'anyLine2')}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} < ${el.val} \n`;
                                 }else{
                                     if(el.moreLess == 1)
-                                        replyStr += `${i}. (${tr(ctx, 'line') + ' ' + el.line}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} > ${el.val} \n`;
+                                        replyStr += `${i+1}. (${tr(ctx, 'line') + ' ' + el.line}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} > ${el.val} \n`;
                                     else 
-                                        replyStr += `${i}. (${tr(ctx, 'line') + ' ' + el.line}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} < ${el.val} \n`;
+                                        replyStr += `${i+1}. (${tr(ctx, 'line') + ' ' + el.line}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} < ${el.val} \n`;
                                 }
                             });
                             
@@ -509,7 +507,7 @@ bot.on('text',(ctx) => {
                 break;
 
             case 8:
-                var val = parseInt(txt); //TODO parseFloat nado
+                var val = parseFloat(txt);
                 if (val > 0){
                     var tmpNotif = userData[uid].notifTmp;
                     delete tmpNotif.str;
@@ -524,8 +522,8 @@ bot.on('text',(ctx) => {
                 }
                 break;
 
-            case 9:
-                var val = parseInt(txt); //parseFloat nado
+            case 9: //TODO Пототм сделать тип удаление по инлайн кнопкам
+                var val = parseInt(txt) - 1;
                 if (val >= 0 && val <=  userData[uid].notif.length){
                     userData[uid].notif.splice(val, 1);
                     userData[uid].state = 4;
@@ -558,6 +556,7 @@ bot.on('text',(ctx) => {
 
 bot.action('P1Any', (ctx) => { //st5
     var uid = ctx.from.id;
+    checkUid(uid, ctx);
     var str = tr(ctx,'notifAddPt1')+
     tr(ctx,'any').toLowerCase()+
     tr(ctx,'notifAddPt2');
@@ -572,6 +571,7 @@ bot.action('P1Any', (ctx) => { //st5
 
 bot.action('P1L1', (ctx) => {
     var uid = ctx.from.id;
+    checkUid(uid, ctx);
     var str = tr(ctx,'notifAddPt1')+
     '1'+
     tr(ctx,'notifAddPt2');
@@ -585,6 +585,7 @@ bot.action('P1L1', (ctx) => {
 });
 
 bot.action('P1L2', (ctx) => {
+    checkUid(uid, ctx);
     var uid = ctx.from.id;
     var str = tr(ctx,'notifAddPt1')+
     '2'+
@@ -600,6 +601,7 @@ bot.action('P1L2', (ctx) => {
 
 bot.action('P1L3', (ctx) => {
     var uid = ctx.from.id;
+    checkUid(uid, ctx);
     var str = tr(ctx,'notifAddPt1')+
     '3'+
     tr(ctx,'notifAddPt2');
@@ -614,6 +616,7 @@ bot.action('P1L3', (ctx) => {
 
 bot.action('P2V', (ctx) => { //st6
     var uid = ctx.from.id;
+    checkUid(uid, ctx);
     userData[uid].notifTmp.str += tr(ctx, 'voltage'); 
     ctx.editMessageText(userData[uid].notifTmp.str + tr(ctx,'notifAddPt3') + '___', kb.notifP3Kb(userData[uid].lang)); //Сделать вместо Х
     userData[uid].state = 7;
@@ -622,6 +625,7 @@ bot.action('P2V', (ctx) => { //st6
 
 bot.action('P2A', (ctx) => {
     var uid = ctx.from.id;
+    checkUid(uid, ctx);
     userData[uid].notifTmp.str += tr(ctx, 'amperage');
     ctx.editMessageText(userData[uid].notifTmp.str + tr(ctx,'notifAddPt3') + '___', kb.notifP3Kb(userData[uid].lang));
     userData[uid].state = 7;
@@ -630,6 +634,7 @@ bot.action('P2A', (ctx) => {
 
 bot.action('P2W', (ctx) => {
     var uid = ctx.from.id;
+    checkUid(uid, ctx);
     userData[uid].notifTmp.str += tr(ctx, 'power');
     ctx.editMessageText(userData[uid].notifTmp.str + tr(ctx,'notifAddPt3') + '___', kb.notifP3Kb(userData[uid].lang));
     userData[uid].state = 7;
@@ -638,6 +643,7 @@ bot.action('P2W', (ctx) => {
 
 bot.action('P2kWh', (ctx) => {
     var uid = ctx.from.id;
+    checkUid(uid, ctx);
     userData[uid].notifTmp.str += tr(ctx, 'energy');
     ctx.editMessageText(userData[uid].notifTmp.str + tr(ctx,'notifAddPt3') + '___', kb.notifP3Kb(userData[uid].lang));
     userData[uid].state = 7;
@@ -646,6 +652,7 @@ bot.action('P2kWh', (ctx) => {
 
 bot.action('P3More', (ctx) => { //st7
     var uid = ctx.from.id;
+    checkUid(uid, ctx);
     userData[uid].notifTmp.str += ' ' + tr(ctx, 'more').toLowerCase() + ' ';
     ctx.editMessageText(userData[uid].notifTmp.str + '('+ tr(ctx, 'enterANum') +')', kb.notifP4Kb(userData[uid].lang));
     userData[uid].state = 8;
@@ -654,6 +661,7 @@ bot.action('P3More', (ctx) => { //st7
 
 bot.action('P3Less', (ctx) => {
     var uid = ctx.from.id;
+    checkUid(uid, ctx);
     userData[uid].notifTmp.str += ' ' + tr(ctx, 'less').toLowerCase() + ' ';
     ctx.editMessageText(userData[uid].notifTmp.str + '('+ tr(ctx, 'enterANum') +')', kb.notifP4Kb(userData[uid].lang));
     userData[uid].state = 8;
@@ -662,17 +670,33 @@ bot.action('P3Less', (ctx) => {
 
 bot.action('notifAddCancel', (ctx) => {
     var uid = ctx.from.id;
+    checkUid(uid, ctx);
     ctx.deleteMessage();
     userData[uid].notifTmp = {};
     userData[uid].state = 4;
 });
 
 bot.action('notifDelCancel', (ctx) => {
-    var uid = ctx.from.id;
+    checkUid(ctx.from.id, ctx);
     ctx.deleteMessage();
-    userData[uid].state = 4;
+    userData[ctx.from.id].state = 4;
 });
 
+function checkUid(uid, ctx){ //Доп проверка просто на всякий случай
+    if(userData[uid] === undefined){
+        Object.assign(userData, {
+            [uid]:{
+                state:0,
+                updateMsgTimeout: config.updateMsgTimeout,
+                notifCoolDown: config.notificationCoolDown,
+                lang : 0,
+                notif:[]
+            }
+        });
+        
+        ctx.reply('USERDATA RESET', kb.mainKb(userData[uid].lang));
+    }
+}
 
 bot.launch();
 console.log('bot.launch');
