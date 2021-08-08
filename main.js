@@ -47,28 +47,29 @@ var serialPort = new SerialPort(config.serialPort, {
 function update(data) {
     console.log('data: ' + data);
 
-    var tempArr = data.split(';'); //TODO: Эту хрень переделать
+    var dataArr = data.split(';'); //TODO: Эту хрень переделать
 
-    v1 = parseFloat(tempArr[0]);
-    v2 = parseFloat(tempArr[1]);
-    v3 = parseFloat(tempArr[2]);
+    v1 = parseFloat(dataArr[0]);
+    v2 = parseFloat(dataArr[1]);
+    v3 = parseFloat(dataArr[2]);
 
-    a1 = parseFloat(tempArr[3]);
-    a2 = parseFloat(tempArr[4]);
-    a3 = parseFloat(tempArr[5]);
+    a1 = parseFloat(dataArr[3]);
+    a2 = parseFloat(dataArr[4]);
+    a3 = parseFloat(dataArr[5]);
 
-    w1 = parseFloat(tempArr[6]);    
-    w2 = parseFloat(tempArr[7]);
-    w3 = parseFloat(tempArr[8]);
+    w1 = parseFloat(dataArr[6]);    
+    w2 = parseFloat(dataArr[7]);
+    w3 = parseFloat(dataArr[8]);
 
-    kwh1 = parseFloat(tempArr[9]);
-    kwh2 = parseFloat(tempArr[10]);
-    kwh3 = parseFloat(tempArr[11]);
+    kwh1 = parseFloat(dataArr[9]);
+    kwh2 = parseFloat(dataArr[10]);
+    kwh3 = parseFloat(dataArr[11]);
 
+    var tempArr = [ [[v1,v2,v3],[a1,a2,a3],[w1,w2,w3],[kwh1,kwh2,kwh3]], [v1,a1,w1,kwh1], [v2,a2,w2,kwh2], [v3,a3,w3,kwh3]];
 
     for(let uid in userData){
         userData[uid].notif.forEach( (el) => {
-            if (checkCondition(el) && ( (Date.now() - el.timestamp) > userData[uid].notifCoolDown || el.timestamp === undefined)  ){
+            if (checkCondition(el, tempArr) && ( (Date.now() - el.timestamp) > userData[uid].notifCoolDown || el.timestamp === undefined)  ){
                 var replyStr = loc.translate(userData[uid].lang, 'gotNotification');
                 
                 if(el.line == 0){
@@ -110,136 +111,19 @@ function update(data) {
 }
  
 
-function checkCondition(el){
-    switch(el.line){
-        case 0:
-            switch(el.VAWH){
-                case 0:
-                    if( (el.moreLess == 1) && (v1 > el.val || v2 > el.val || v3 > el.val) ){
-                        return 1;
-                    }else if((el.moreLess == 0) && (v1 < el.val || v2 < el.val || v3 < el.val)){
-                        return 1;
-                    }
-                    break;
-                case 1:
-                    if( (el.moreLess == 1) && (a1 > el.val || a2 > el.val || a3 > el.val) ){
-                        return 1;
-                    }else if((el.moreLess == 0) && (a1 < el.val || a2 < el.val || a3 < el.val)){
-                        return 1;
-                    }
-                    break;
-                case 2:
-                    if( (el.moreLess == 1) && (w1 > el.val || w2 > el.val || w3 > el.val) ){
-                        return 1;
-                    }else if((el.moreLess == 0) && (w1 < el.val || w2 < el.val || w3 < el.val)){
-                        return 1;
-                    }
-                    break;
-                case 3:
-                    if( (el.moreLess == 1) && (kwh1 > el.val || kwh2 > el.val || kwh3 > el.val) ){
-                        return 1;
-                    }else if((el.moreLess == 0) && (kwh1 < el.val || kwh2 < el.val || kwh3 < el.val)){
-                        return 1;
-                    }
-                    break;
-            }
-            break;
-        case 1:
-            switch(el.VAWH){
-                case 0:
-                    if ( (el.moreLess == 1) && (v1 > el.val)){
-                        return 1;
-                    }else if ( (el.moreLess == 0) && (v1 < el.val)){
-                        return 1;
-                    } 
-                    break;
-                case 1:
-                    if ( (el.moreLess == 1) && (a1 > el.val)){
-                        return 1;
-                    }else if ( (el.moreLess == 0) && (a1 < el.val)){
-                        return 1;
-                    } 
-                    break;
-                case 2:
-                    if ( (el.moreLess == 1) && (w1 > el.val)){
-                        return 1;
-                    }else if ( (el.moreLess == 0) && (w1 < el.val)){
-                        return 1;
-                    } 
-                    break;
-                case 3:
-                    if ( (el.moreLess == 1) && (kwh1 > el.val)){
-                        return 1;
-                    }else if ( (el.moreLess == 0) && (kwh1 < el.val)){
-                        return 1;
-                    } 
-                    break;
-            }
-            break;
-        case 2:
-            switch(el.VAWH){
-                case 0:
-                    if ( (el.moreLess == 1) && (v2 > el.val)){
-                        return 1;
-                    }else if ( (el.moreLess == 0) && (v2 < el.val)){
-                        return 1;
-                    } 
-                    break;
-                case 1:
-                    if ( (el.moreLess == 1) && (a2 > el.val)){
-                        return 1;
-                    }else if ( (el.moreLess == 0) && (a2 < el.val)){
-                        return 1;
-                    } 
-                    break;
-                case 2:
-                    if ( (el.moreLess == 1) && (w2 > el.val)){
-                        return 1;
-                    }else if ( (el.moreLess == 0) && (w2 < el.val)){
-                        return 1;
-                    } 
-                    break;
-                case 3:
-                    if ( (el.moreLess == 1) && (kwh2 > el.val)){
-                        return 1;
-                    }else if ( (el.moreLess == 0) && (kwh2 < el.val)){
-                        return 1;
-                    } 
-                    break;
-            }
-            break;
-        case 3:
-            switch(el.VAWH){
-                case 0:
-                    if ( (el.moreLess == 1) && (v3 > el.val)){
-                        return 1;
-                    }else if ( (el.moreLess == 0) && (v3 < el.val)){
-                        return 1;
-                    } 
-                    break;
-                case 1:
-                    if ( (el.moreLess == 1) && (a3 > el.val)){
-                        return 1;
-                    }else if ( (el.moreLess == 0) && (a3 < el.val)){
-                        return 1;
-                    } 
-                    break;
-                case 2:
-                    if ( (el.moreLess == 1) && (w3 > el.val)){
-                        return 1;
-                    }else if ( (el.moreLess == 0) && (w3 < el.val)){
-                        return 1;
-                    } 
-                    break;
-                case 3:
-                    if ( (el.moreLess == 1) && (kwh3 > el.val)){
-                        return 1;
-                    }else if ( (el.moreLess == 0) && (kwh3 < el.val)){
-                        return 1;
-                    } 
-                    break;
-            }
-            break;
+function checkCondition(el, arr){
+    if(el.line == 0){
+        if( (el.moreLess == 1) && ( (arr[1][el.VAWH] > el.val) || (arr[2][el.VAWH] > el.val) || (arr[3][el.VAWH] > el.val))){
+            return 1;
+        }else if ((el.moreLess == 0) && ( (arr[1][el.VAWH] < el.val) || (arr[2][el.VAWH] < el.val) || (arr[3][el.VAWH] < el.val))){
+            return 1;
+        }
+    }else{
+        if( (el.moreLess == 1) && (arr[el.line][el.VAWH] > el.val)){
+            return 1;
+        }else if ((el.moreLess == 0) && (arr[el.line][el.VAWH] < el.val)){
+            return 1;
+        }
     }
 }
 
