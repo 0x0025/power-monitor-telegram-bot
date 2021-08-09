@@ -235,7 +235,13 @@ bot.command('status', (ctx) => {
 
 });
 
-
+bot.command('test', (ctx) => {
+    var keyboard = []; 
+    for (let i = 0; i < 10; i++) {
+        keyboard.push( [Markup.button.callback(i, 'i')]);
+    }
+    ctx.reply('test', Markup.inlineKeyboard(keyboard) );
+});
 
 bot.on('text',(ctx) => {
     var txt = ctx.message.text;
@@ -357,9 +363,10 @@ bot.on('text',(ctx) => {
                     case tr(ctx, 'del'): //Удаление уведомлений
                         if(userData[uid].notif.length > 0){
                             userData[uid].state = 9;
-                            var replyStr = tr(ctx, 'chooseNotifToDel');
+                            var keyboard = [];
                             
                             userData[uid].notif.forEach((el, i) => {
+                                var replyStr = '';
                                 if (el.line == 0){
                                     if(el.moreLess == 1)
                                         replyStr += `${i+1}. (${tr(ctx, 'anyLine2')}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} > ${el.val} \n`;
@@ -371,9 +378,12 @@ bot.on('text',(ctx) => {
                                     else 
                                         replyStr += `${i+1}. (${tr(ctx, 'line') + ' ' + el.line}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} < ${el.val} \n`;
                                 }
+
+                                keyboard.push([Markup.button.callback( replyStr, 'delNotif'+(i+1) )] );
+                                //replyStr = '';
                             });
-                            
-                            ctx.reply(replyStr, kb.notifDel(userData[uid].lang));
+                            keyboard.push( [Markup.button.callback( tr(ctx, 'cancel'), 'notifDelCancel')] );
+                            ctx.reply(tr(ctx, 'chooseNotifToDel'), Markup.inlineKeyboard(keyboard));
                         }else{
                             ctx.reply(tr(ctx, 'noNotif'));
                         }
