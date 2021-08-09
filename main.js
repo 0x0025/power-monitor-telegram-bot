@@ -12,7 +12,6 @@ var a1, a2, a3;
 var w1, w2, w3;
 var kwh1, kwh2, kwh3;
 
-
 var userData = {};
 
 function readUserData(){
@@ -47,7 +46,7 @@ var serialPort = new SerialPort(config.serialPort, {
 function update(data) {
     console.log('data: ' + data);
 
-    var dataArr = data.split(';'); //TODO: Эту хрень переделать
+    var dataArr = data.split(';');
 
     v1 = parseFloat(dataArr[0]);
     v2 = parseFloat(dataArr[1]);
@@ -143,7 +142,6 @@ function tryOpenPort(){
     
 }
 
-
 serialPort.pipe(new StringStream()) 
     .lines('\n')                  
     .each(                        
@@ -238,13 +236,6 @@ bot.command('status', (ctx) => {
 });
 
 
-bot.command('quit', (ctx) => {
-    //ctx.telegram.leaveChat(ctx.message.chat.id)
-    //ctx.leaveChat()
-    ctx.reply('quit ', Markup.removeKeyboard() );
-    //Чето нада
-});
-
 
 bot.on('text',(ctx) => {
     var txt = ctx.message.text;
@@ -255,18 +246,18 @@ bot.on('text',(ctx) => {
     try{
         switch(userData[uid].state){
 
-            case 0:
+            case 0: //Гл меню
                 switch(txt){
                     case tr(ctx, 'settings'):
                         userData[uid].state = 1;
-                        ctx.reply(tr(ctx, 'settings'),kb.settingsKb(userData[uid].lang)); //Надо найти как выслать клавиатуру без отправки текста
+                        ctx.reply(tr(ctx, 'settings'),kb.settingsKb(userData[uid].lang));
                         break;
                     default:
                         break;
                 }
             break; 
 
-            case 1:
+            case 1: //Настройки
                 switch(txt){
                     case tr(ctx, 'lang'):
                         userData[uid].state = 2;
@@ -297,7 +288,7 @@ bot.on('text',(ctx) => {
                 }
                 break;
             
-            case 2:
+            case 2: //Настройка языка
                 switch(txt){
                     case'Русский':
                         userData[uid].lang = 0;
@@ -316,7 +307,7 @@ bot.on('text',(ctx) => {
                 }
                 break;
 
-            case 3:
+            case 3: //Таймаут статуса
                 var val = parseInt(txt);
                 if ((val < 500) && (val > 0)){
                     userData[uid].updateMsgTimeout = val * 1000;
@@ -329,17 +320,17 @@ bot.on('text',(ctx) => {
 
             case 4:
                 switch (txt){
-                    case tr(ctx, 'back'):
+                    case tr(ctx, 'back'): //Назад
                         userData[uid].state = 1;
                         ctx.reply(tr(ctx, 'settings'),kb.settingsKb(userData[uid].lang));
                         break;
 
-                    case tr(ctx, 'add'):
+                    case tr(ctx, 'add'): //Добавление уведомлений
                         userData[uid].state = 5;
                         ctx.reply(`${tr(ctx,'notifAddPt1')}___${tr(ctx,'notifAddPt2')}___${tr(ctx,'notifAddPt3')}___`, kb.notifP1Kb(userData[uid].lang));
                         break;
 
-                    case tr(ctx, 'list'):
+                    case tr(ctx, 'list'): //Список уведомлений
                         if(userData[uid].notif.length > 0){
                             var replyStr = "";
                             
@@ -363,7 +354,7 @@ bot.on('text',(ctx) => {
                         }
                         break;
                      
-                    case tr(ctx, 'del'):
+                    case tr(ctx, 'del'): //Удаление уведомлений
                         if(userData[uid].notif.length > 0){
                             userData[uid].state = 9;
                             var replyStr = tr(ctx, 'chooseNotifToDel');
@@ -390,7 +381,7 @@ bot.on('text',(ctx) => {
                 }
                 break;
 
-            case 8:
+            case 8: //Добавление уведомлений
                 var val = parseFloat(txt);
                 if (val > 0){
                     var tmpNotif = userData[uid].notifTmp;
@@ -406,7 +397,7 @@ bot.on('text',(ctx) => {
                 }
                 break;
 
-            case 9: //TODO Пототм сделать тип удаление по инлайн кнопкам
+            case 9: //Удаление уведомлений
                 var val = parseInt(txt) - 1;
                 if (val >= 0 && val <=  userData[uid].notif.length){
                     userData[uid].notif.splice(val, 1);
@@ -418,7 +409,7 @@ bot.on('text',(ctx) => {
 
                 break;
 
-            case 10:
+            case 10: //Кулдаун уведомлений
                 var val = parseInt(txt);
                 if ((val < 500) && (val > 0)){
                     userData[uid].notifCoolDown = val * 1000;
@@ -438,7 +429,7 @@ bot.on('text',(ctx) => {
     }
 });
 
-bot.action('P1Any', (ctx) => { //st5
+bot.action('P1Any', (ctx) => { //state 5
     var uid = ctx.from.id;
     checkUid(uid, ctx);
     var str = tr(ctx,'notifAddPt1')+
@@ -498,7 +489,7 @@ bot.action('P1L3', (ctx) => {
     };
 });
 
-bot.action('P2V', (ctx) => { //st6
+bot.action('P2V', (ctx) => { //state6
     var uid = ctx.from.id;
     checkUid(uid, ctx);
     userData[uid].notifTmp.str += tr(ctx, 'voltage'); 
@@ -534,7 +525,7 @@ bot.action('P2kWh', (ctx) => {
     userData[uid].notifTmp.VAWH = 3;
 }); 
 
-bot.action('P3More', (ctx) => { //st7
+bot.action('P3More', (ctx) => { //state7
     var uid = ctx.from.id;
     checkUid(uid, ctx);
     userData[uid].notifTmp.str += ' ' + tr(ctx, 'more').toLowerCase() + ' ';
