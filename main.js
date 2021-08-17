@@ -235,14 +235,6 @@ bot.command('status', (ctx) => {
 
 });
 
-bot.command('test', (ctx) => {
-    var keyboard = []; 
-    for (let i = 0; i < 10; i++) {
-        keyboard.push( [Markup.button.callback(i, 'i')]);
-    }
-    ctx.reply('test', Markup.inlineKeyboard(keyboard) );
-});
-
 bot.on('text',(ctx) => {
     var txt = ctx.message.text;
     var uid = ctx.message.from.id;
@@ -362,28 +354,51 @@ bot.on('text',(ctx) => {
                      
                     case tr(ctx, 'del'): //Удаление уведомлений
                         if(userData[uid].notif.length > 0){
-                            userData[uid].state = 9;
-                            var keyboard = [];
-                            
-                            userData[uid].notif.forEach((el, i) => {
-                                var replyStr = '';
-                                if (el.line == 0){
-                                    if(el.moreLess == 1)
-                                        replyStr += `${i+1}. (${tr(ctx, 'anyLine2')}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} > ${el.val} \n`;
-                                    else 
-                                        replyStr += `${i+1}. (${tr(ctx, 'anyLine2')}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} < ${el.val} \n`;
-                                }else{
-                                    if(el.moreLess == 1)
-                                        replyStr += `${i+1}. (${tr(ctx, 'line') + ' ' + el.line}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} > ${el.val} \n`;
-                                    else 
-                                        replyStr += `${i+1}. (${tr(ctx, 'line') + ' ' + el.line}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} < ${el.val} \n`;
-                                }
+
+                            if(userData[uid].notif.length < 10){
+                                userData[uid].state = 11;
+                                var keyboard = [];
+                                
+                                userData[uid].notif.forEach((el, i) => {
+                                    var replyStr = '';
+                                    if (el.line == 0){
+                                        if(el.moreLess == 1)
+                                            replyStr += `${i+1}. (${tr(ctx, 'anyLine2')}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} > ${el.val} \n`;
+                                        else 
+                                            replyStr += `${i+1}. (${tr(ctx, 'anyLine2')}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} < ${el.val} \n`;
+                                    }else{
+                                        if(el.moreLess == 1)
+                                            replyStr += `${i+1}. (${tr(ctx, 'line') + ' ' + el.line}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} > ${el.val} \n`;
+                                        else 
+                                            replyStr += `${i+1}. (${tr(ctx, 'line') + ' ' + el.line}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} < ${el.val} \n`;
+                                    }
 
                                 keyboard.push([Markup.button.callback( replyStr, 'delNotif'+(i+1) )] );
-                                //replyStr = '';
-                            });
-                            keyboard.push( [Markup.button.callback( tr(ctx, 'cancel'), 'notifDelCancel')] );
-                            ctx.reply(tr(ctx, 'chooseNotifToDel'), Markup.inlineKeyboard(keyboard));
+                                });
+                                keyboard.push( [Markup.button.callback( tr(ctx, 'cancel'), 'notifDelCancel')] );
+                                ctx.reply(tr(ctx, 'chooseNotifToDel'), Markup.inlineKeyboard(keyboard).resize());
+                            }else{
+                                userData[uid].state = 9;
+                                var replyStr = tr(ctx, 'chooseNotifToDel');
+                            
+                                userData[uid].notif.forEach((el, i) => {
+                                    if (el.line == 0){
+                                        if(el.moreLess == 1)
+                                            replyStr += `${i+1}. (${tr(ctx, 'anyLine2')}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} > ${el.val} \n`;
+                                        else 
+                                            replyStr += `${i+1}. (${tr(ctx, 'anyLine2')}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} < ${el.val} \n`;
+                                    }else{
+                                        if(el.moreLess == 1)
+                                            replyStr += `${i+1}. (${tr(ctx, 'line') + ' ' + el.line}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} > ${el.val} \n`;
+                                        else 
+                                            replyStr += `${i+1}. (${tr(ctx, 'line') + ' ' + el.line}) ${loc.VAWHtranslate(userData[uid].lang,el.VAWH)} < ${el.val} \n`;
+                                    }
+                                });
+                                
+                                ctx.reply(replyStr, kb.notifDel(userData[uid].lang));
+                            
+                            }
+
                         }else{
                             ctx.reply(tr(ctx, 'noNotif'));
                         }
@@ -407,7 +422,7 @@ bot.on('text',(ctx) => {
                 }
                 break;
 
-            case 9: //Удаление уведомлений
+            case 9: //Удаление уведомлений если их больше 10
                 var val = parseInt(txt) - 1;
                 if (val >= 0 && val <=  userData[uid].notif.length){
                     userData[uid].notif.splice(val, 1);
@@ -428,6 +443,10 @@ bot.on('text',(ctx) => {
                 }else{
                     ctx.reply(tr(ctx, 'enterCorrectNum'));
                 }
+                break;
+
+            case 11: 
+                
                 break;
 
             default:
@@ -567,8 +586,96 @@ bot.action('notifDelCancel', (ctx) => {
     userData[ctx.from.id].state = 4;
 });
 
+bot.action('delNotif1', (ctx) => {
+    checkUid(ctx.from.id, ctx);
+    userData[ctx.from.id].notif.splice(0, 1);
+    ctx.reply(tr(ctx, 'notifDeleted'), kb.notifKb(userData[ctx.from.id].lang));
+    ctx.deleteMessage();
+    userData[ctx.from.id].state = 4;
+});
+
+bot.action('delNotif2', (ctx) => {
+    checkUid(ctx.from.id, ctx);
+    userData[ctx.from.id].notif.splice(1, 1);
+    ctx.reply(tr(ctx, 'notifDeleted'), kb.notifKb(userData[ctx.from.id].lang));
+    ctx.deleteMessage();
+    userData[ctx.from.id].state = 4;
+});
+
+bot.action('delNotif3', (ctx) => {
+    checkUid(ctx.from.id, ctx);
+    userData[ctx.from.id].notif.splice(2, 1);
+    ctx.reply(tr(ctx, 'notifDeleted'), kb.notifKb(userData[ctx.from.id].lang));
+    ctx.deleteMessage();
+    userData[ctx.from.id].state = 4;
+});
+
+bot.action('delNotif4', (ctx) => {
+    checkUid(ctx.from.id, ctx);
+    userData[ctx.from.id].notif.splice(3, 1);
+    ctx.reply(tr(ctx, 'notifDeleted'), kb.notifKb(userData[ctx.from.id].lang));
+    ctx.deleteMessage();
+    userData[ctx.from.id].state = 4;
+});
+
+bot.action('delNotif5', (ctx) => {
+    checkUid(ctx.from.id, ctx);
+    userData[ctx.from.id].notif.splice(4, 1);
+    ctx.reply(tr(ctx, 'notifDeleted'), kb.notifKb(userData[ctx.from.id].lang));
+    ctx.deleteMessage();
+    userData[ctx.from.id].state = 4;
+});
+
+bot.action('delNotif6', (ctx) => {
+    checkUid(ctx.from.id, ctx);
+    userData[ctx.from.id].notif.splice(5, 1);
+    ctx.reply(tr(ctx, 'notifDeleted'), kb.notifKb(userData[ctx.from.id].lang));
+    ctx.deleteMessage();
+    userData[ctx.from.id].state = 4;
+});
+
+bot.action('delNotif7', (ctx) => {
+    checkUid(ctx.from.id, ctx);
+    userData[ctx.from.id].notif.splice(6, 1);
+    ctx.reply(tr(ctx, 'notifDeleted'), kb.notifKb(userData[ctx.from.id].lang));
+    ctx.deleteMessage();
+    userData[ctx.from.id].state = 4;
+});
+
+bot.action('delNotif8', (ctx) => {
+    checkUid(ctx.from.id, ctx);
+    userData[ctx.from.id].notif.splice(7, 1);
+    ctx.reply(tr(ctx, 'notifDeleted'), kb.notifKb(userData[ctx.from.id].lang));
+    ctx.deleteMessage();
+    userData[ctx.from.id].state = 4;
+});
+
+bot.action('delNotif9', (ctx) => {
+    checkUid(ctx.from.id, ctx);
+    userData[ctx.from.id].notif.splice(8, 1);
+    ctx.reply(tr(ctx, 'notifDeleted'), kb.notifKb(userData[ctx.from.id].lang));
+    ctx.deleteMessage();
+    userData[ctx.from.id].state = 4;
+});
+
+bot.action('delNotif10', (ctx) => {
+    checkUid(ctx.from.id, ctx);
+    userData[ctx.from.id].notif.splice(9, 1);
+    ctx.reply(tr(ctx, 'notifDeleted'), kb.notifKb(userData[ctx.from.id].lang));
+    ctx.deleteMessage();
+    userData[ctx.from.id].state = 4;
+});
+
+bot.action('delNotif11', (ctx) => {
+    checkUid(ctx.from.id, ctx);
+    userData[ctx.from.id].notif.splice(10, 1);
+    ctx.reply(tr(ctx, 'notifDeleted'), kb.notifKb(userData[ctx.from.id].lang));
+    ctx.deleteMessage();
+    userData[ctx.from.id].state = 4;
+});
+
 function checkUid(uid, ctx){ //Доп проверка просто на всякий случай
-    if(userData[uid] === undefined){
+    if(userData[uid] === undefined){ ///Если uid не undefined
         Object.assign(userData, {
             [uid]:{
                 state:0,
