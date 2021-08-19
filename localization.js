@@ -38,7 +38,12 @@ const rus = {
     'notifMore': 'выше',
     'anyLine': 'Одна из фаз',
     'notifCD':'Кулдаун уведомлений',
-    'anyLine2':'Любая фаза'
+    'anyLine2':'Любая фаза',
+    'ChoosePeriod':'Выберите период:',
+    'today':'Сегодня',
+    'yesterday':'Вчера',
+    'week':'Неделя',
+    'month':'Месяц'
 };
 
 const eng = {
@@ -81,7 +86,12 @@ const eng = {
     'notifMore': 'is higher than',
     'anyLine': 'One of the lines',
     'notifCD':'Notifications cooldown',
-    'anyLine2':'Any line'
+    'anyLine2':'Any line',
+    'ChoosePeriod':'Choose period:',
+    'today':'Today',
+    'yesterday':'Yesterday',
+    'week':'Week',
+    'month':'Month'
 };
 
 function translate(lang, str){

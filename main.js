@@ -13,6 +13,7 @@ var w1, w2, w3;
 var kwh1, kwh2, kwh3;
 
 var userData = {};
+var stats = {};
 
 function readUserData(){
     fs.readFile('./userData.json',{encoding: 'utf8'},function(err,data) {
@@ -235,11 +236,16 @@ bot.command('status', (ctx) => {
 
 });
 
+bot.command('stats', (ctx) => {
+    var uid = ctx.from.id;
+    userData[uid].state = 12;
+    ctx.reply(tr(ctx, 'ChoosePeriod'), kb.statsPeriod(userData[uid].lang) );
+});
+
 bot.on('text',(ctx) => {
     var txt = ctx.message.text;
     var uid = ctx.message.from.id;
     checkUid(uid, ctx);
-    console.log(userData[uid].state);
 
     try{
         switch(userData[uid].state){
@@ -445,8 +451,12 @@ bot.on('text',(ctx) => {
                 }
                 break;
 
-            case 11: 
-                
+            case 11: //Удаление уведомлений обычный способ
+
+                break;
+
+            case 12: //Статистка
+
                 break;
 
             default:
@@ -674,9 +684,34 @@ bot.action('delNotif11', (ctx) => {
     userData[ctx.from.id].state = 4;
 });
 
+bot.action('periodToday', (ctx) =>{
+    ctx.editMessageText('Обычный \n ```12123 123123\n123123eefr3\n``` ', { parse_mode: 'MarkdownV2' });
+    userData[ctx.from.id].state = 0;
+});
+
+bot.action('periodYesterday', (ctx) =>{
+    ctx.editMessageText('2');
+    userData[ctx.from.id].state = 0;
+});
+
+bot.action('periodWeek', (ctx) =>{
+    ctx.editMessageText('3');
+    userData[ctx.from.id].state = 0;
+});
+
+bot.action('periodMonth', (ctx) =>{
+    ctx.editMessageText('4');
+    userData[ctx.from.id].state = 0;
+});
+
+bot.action('statsCancel', (ctx) =>{
+    ctx.deleteMessage();
+    userData[ctx.from.id].state = 0;
+});
+
 function checkUid(uid, ctx){ //Доп проверка просто на всякий случай
-    if(userData[uid] === undefined){ ///Если uid не undefined
-        Object.assign(userData, {
+    if((userData[uid] === undefined) && (typeof(uid) != "undefined")){ 
+            Object.assign(userData, {
             [uid]:{
                 state:0,
                 updateMsgTimeout: config.updateMsgTimeout,

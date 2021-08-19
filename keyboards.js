@@ -6,6 +6,9 @@ function mainKb(lang) {
         [
             [
                 '/status',
+                '/stats'
+            ],
+            [
                 loc.translate(lang, 'settings')
             ]
         ]
@@ -74,7 +77,7 @@ function notifP1Kb(lang) {
                 Markup.button.callback(loc.translate(lang, 'cancel'), 'notifAddCancel')
             ]
         ]
-    );
+    ).resize();
 }
 
 function notifP2Kb(lang) { 
@@ -92,7 +95,7 @@ function notifP2Kb(lang) {
                 Markup.button.callback(loc.translate(lang, 'cancel'), 'notifAddCancel')
             ]
         ]
-    );
+    ).resize();
 }
 
 function notifP3Kb(lang) { 
@@ -106,7 +109,7 @@ function notifP3Kb(lang) {
                 Markup.button.callback(loc.translate(lang, 'cancel'), 'notifAddCancel')
             ]
         ]
-    );
+    ).resize();
 }
 
 function notifP4Kb(lang) {
@@ -114,7 +117,7 @@ function notifP4Kb(lang) {
         [
             Markup.button.callback(loc.translate(lang, 'cancel'), 'notifAddCancel')
         ]
-    );
+    ).resize();
 }
 
 function notifDel(lang) { 
@@ -122,8 +125,28 @@ function notifDel(lang) {
         [
             Markup.button.callback(loc.translate(lang, 'cancel'), 'notifDelCancel')
         ]
-    );
+    ).resize();
 }
+
+function statsPeriod(lang){
+    return Markup.inlineKeyboard(
+        [
+            [
+                Markup.button.callback(loc.translate(lang, 'today'), 'periodToday'),
+            ],[
+                Markup.button.callback(loc.translate(lang, 'yesterday'), 'periodYesterday'),
+            ],[
+                Markup.button.callback(loc.translate(lang, 'week'), 'periodWeek'),
+            ],[
+                Markup.button.callback(loc.translate(lang, 'month'), 'periodMonth'),
+            ],[
+                Markup.button.callback(loc.translate(lang, 'cancel'), 'statsCancel')
+            ]
+        ]
+    ).resize();
+}
+
+module.exports.statsPeriod = statsPeriod;
 module.exports.notifDel = notifDel;
 module.exports.notifP4Kb = notifP4Kb;
 module.exports.notifP3Kb = notifP3Kb;
