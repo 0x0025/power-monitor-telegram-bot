@@ -20,9 +20,8 @@
   },
   "homepage": "https://github.com/ox25/power-monitor-telegram-bot#readme",
   "dependencies": {
-    "net-ping": "^1.2.3",
-    "scramjet": "^4.36.0",
+    "scramjet": "^4.35.20",
     "serialport": "^9.2.0",
-    "telegraf": "^4.4.1"
+    "telegraf": "^4.4.0"
   }
 }

@@ -2,9 +2,7 @@ const { Telegraf, Markup } = require('telegraf');
 const SerialPort = require('serialport');
 const { StringStream } = require('scramjet'); 
 const fs = require('fs');
-var ping = require("net-ping");
 
-var session = ping.createSession ();
 var config = require('./config.json'); //Потом тоже чтение кфг сделать
 var kb = require('./keyboards.js');
 var loc = require('./localization.js');
@@ -730,37 +728,15 @@ function checkUid(uid, ctx){ //Доп проверка просто на вся�
 bot.launch();
 console.log('bot.launch');
 
-bot.catch((err, ctx) => {
-    console.log(`Ooops, encountered an error for ${ctx.updateType}`, err);
-    stopAll('SIGINT');
-});
-
-function pingGoogle(){
-    session.pingHost ("8.8.8.8", function (error, target) {
-        if (error){
-            console.log (target + ": " + error.toString ());
-            stopAll('SIGINT');
-        }
-        else
-            console.log (target + ": Alive");
-    });
-}
-
-pingGoogleInterval = setInterval(pingGoogle, 6000);
-
-pingGoogle();
-
 process.once('SIGINT', () => {
-    stopAll('SIGINT');
+    bot.stop('SIGINT');
+    serialPort.close(); //TODO UserData сохранить
+    console.log('bot.stop');
+    process.exit();
 });  
 process.once('SIGTERM', () => {
-    stopAll('SIGTERM');
-});
-
-function stopAll(chtoto){
-    bot.stop(chtoto);
-    clearInterval(pingGoogleInterval);
-    writeUserData();
+    bot.stop('SIGTERM');
+    serialPort.close();
     console.log('bot.stop');
-    setTimeout(()=>{process.exit();}, 10000);
-}
+    process.exit();
+});
