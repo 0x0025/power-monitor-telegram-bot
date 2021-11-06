@@ -2,9 +2,9 @@ const { Telegraf, Markup } = require('telegraf');
 const SerialPort = require('serialport');
 const { StringStream } = require('scramjet'); 
 const fs = require('fs');
-var ping = require("net-ping");
+const ping = require("net-ping");
 
-var session = ping.createSession ();
+var pngsession = ping.createSession ();
 var config = require('./config.json'); //Потом тоже чтение кфг сделать
 var kb = require('./keyboards.js');
 var loc = require('./localization.js');
@@ -34,6 +34,12 @@ function writeUserData(){
 
 function tr(ctx, str){ 
     return loc.translate(userData[ctx.from.id].lang, str);
+}
+
+function log2(str){
+    if (config.debug == 1){
+        console.log(str);
+    }
 }
 
 setInterval(writeUserData, 30000);
@@ -736,7 +742,7 @@ bot.catch((err, ctx) => {
 });
 
 function pingGoogle(){
-    session.pingHost ("8.8.8.8", function (error, target) {
+    pngsession.pingHost ("8.8.8.8", function (error, target) {
         if (error){
             console.log (target + ": " + error.toString ());
             stopAll('SIGINT');
