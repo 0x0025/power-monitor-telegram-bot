@@ -20,7 +20,7 @@ var stats = {};
 function readUserData(){
     fs.readFile('./userData.json',{encoding: 'utf8'},function(err,data) {
         userData = JSON.parse(data);
-        console.log('readUserData()');
+        log2('readUserData()');
     });
 }
 
@@ -53,7 +53,7 @@ var serialPort = new SerialPort(config.serialPort, {
 });
 
 function update(data) {
-    console.log('data: ' + data);
+    log2('data: ' + data);
 
     var dataArr = data.split(';');
 
@@ -177,7 +177,7 @@ bot.start((ctx) => {
 
 
 bot.command('status', (ctx) => {
-    console.log('/status');
+    log2('/status');
     
     var uid = ctx.message.from.id;
     checkUid(uid, ctx);
@@ -748,7 +748,7 @@ function pingGoogle(){
             stopAll('SIGINT');
         }
         else
-            console.log (target + ": Alive");
+            log2(target + ": Alive");
     });
 }
 
@@ -768,5 +768,5 @@ function stopAll(chtoto){
     clearInterval(pingGoogleInterval);
     writeUserData();
     console.log('bot.stop');
-    setTimeout(()=>{process.exit();}, 10000);
+    setTimeout(()=>{process.exit();}, 2000);
 }
