@@ -2,9 +2,9 @@ const { Telegraf, Markup } = require('telegraf');
 const SerialPort = require('serialport');
 const { StringStream } = require('scramjet'); 
 const fs = require('fs');
-var ping = require("net-ping");
+const ping = require("net-ping");
 
-var session = ping.createSession ();
+var pngsession = ping.createSession ();
 var config = require('./config.json'); //Потом тоже чтение кфг сделать
 var kb = require('./keyboards.js');
 var loc = require('./localization.js');
@@ -20,7 +20,7 @@ var stats = {};
 function readUserData(){
     fs.readFile('./userData.json',{encoding: 'utf8'},function(err,data) {
         userData = JSON.parse(data);
-        console.log('readUserData()');
+        log2('readUserData()');
     });
 }
 
@@ -28,12 +28,18 @@ function writeUserData(){
     fs.writeFile('./userData.json', JSON.stringify(userData, null, '\t'), function (err) {
         if (err)
             return console.error(err);
-        console.log('writeUserData()');
+        log2('writeUserData()');
     });
 }
 
 function tr(ctx, str){ 
     return loc.translate(userData[ctx.from.id].lang, str);
+}
+
+function log2(str){
+    if (config.debug == 1){
+        console.log(str);
+    }
 }
 
 setInterval(writeUserData, 30000);
@@ -47,7 +53,7 @@ var serialPort = new SerialPort(config.serialPort, {
 });
 
 function update(data) {
-    console.log('data: ' + data);
+    log2('data: ' + data);
 
     var dataArr = data.split(';');
 
@@ -171,7 +177,7 @@ bot.start((ctx) => {
 
 
 bot.command('status', (ctx) => {
-    console.log('/status');
+    log2('/status');
     
     var uid = ctx.message.from.id;
     checkUid(uid, ctx);
@@ -736,13 +742,13 @@ bot.catch((err, ctx) => {
 });
 
 function pingGoogle(){
-    session.pingHost ("8.8.8.8", function (error, target) {
+    pngsession.pingHost ("8.8.8.8", function (error, target) {
         if (error){
             console.log (target + ": " + error.toString ());
             stopAll('SIGINT');
         }
         else
-            console.log (target + ": Alive");
+            log2(target + ": Alive");
     });
 }
 
@@ -762,5 +768,5 @@ function stopAll(chtoto){
     clearInterval(pingGoogleInterval);
     writeUserData();
     console.log('bot.stop');
-    setTimeout(()=>{process.exit();}, 10000);
+    setTimeout(()=>{process.exit();}, 2000);
 }
