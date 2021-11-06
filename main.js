@@ -28,7 +28,7 @@ function writeUserData(){
     fs.writeFile('./userData.json', JSON.stringify(userData, null, '\t'), function (err) {
         if (err)
             return console.error(err);
-        console.log('writeUserData()');
+        log2('writeUserData()');
     });
 }
 
