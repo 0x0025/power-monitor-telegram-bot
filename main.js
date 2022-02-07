@@ -16,11 +16,17 @@ var kwh1, kwh2, kwh3;
 
 var userData = {};
 var stats = {};
+var pzemData = {L1:{}, L2:{}, L3:{}};
 
 function readUserData(){
     fs.readFile('./userData.json',{encoding: 'utf8'},function(err,data) {
-        userData = JSON.parse(data);
-        log2('readUserData()');
+        if (!err){
+            userData = JSON.parse(data);
+            log2('readUserData');
+        }else{
+            userData = {};
+            console.error("could not read userdata:", err);
+        }
     });
 }
 
@@ -28,7 +34,32 @@ function writeUserData(){
     fs.writeFile('./userData.json', JSON.stringify(userData, null, '\t'), function (err) {
         if (err)
             return console.error(err);
-        log2('writeUserData()');
+        log2('writeUserData');
+    });
+}
+
+function readStats(){
+    fs.readFile('./stats.json',{encoding: 'utf8'},function(err,data) {
+        if (!err){
+            stats = JSON.parse(data);
+            log2('readStats');
+        }else{
+            stats = {"L1":{"V":{"today":{},"yesterday":{},"week":{},"month":{}},"A":{"today":{},"yesterday":{},"week":{},"month":{}},"W":{"today":{},"yesterday":{},"week":{},
+            "month":{}},"kWh":{"today":{},"yesterday":{},"week":{},"month":{}}},"L2":{"V":{"today":{},"yesterday":{},"week":{},"month":{}},"A":{"today":{},"yesterday":{},
+            "week":{},"month":{}},"W":{"today":{},"yesterday":{},"week":{},"month":{}},"kWh":{"today":{},"yesterday":{},"week":{},"month":{}}},"L3":{"V":{"today":{},
+            "yesterday":{},"week":{},"month":{}},"A":{"today":{},"yesterday":{},"week":{},"month":{}},"W":{"today":{},"yesterday":{},"week":{},"month":{}},"kWh":{"today":{},
+            "yesterday":{},"week":{},"month":{}}}};
+
+            console.error("could not read userdata:", err);
+        }
+    });
+}
+
+function writeStats(){
+    fs.writeFile('./stats.json', JSON.stringify(stats, null, '\t'), function (err) {
+        if (err)
+            return console.error(err);
+        log2('writeStats');
     });
 }
 
@@ -44,6 +75,7 @@ function log2(str){
 
 setInterval(writeUserData, 30000);
 readUserData();
+readStats();
 
 var portOpenRetry;
 var serialPort = new SerialPort(config.serialPort, { 
@@ -73,9 +105,74 @@ function update(data) {
     kwh2 = parseFloat(dataArr[10]);
     kwh3 = parseFloat(dataArr[11]);
 
-    var tempArr = [ [[v1,v2,v3],[a1,a2,a3],[w1,w2,w3],[kwh1,kwh2,kwh3]], [v1,a1,w1,kwh1], [v2,a2,w2,kwh2], [v3,a3,w3,kwh3]];
+    pzemData.L1.V = parseFloat(dataArr[0]);
+    pzemData.L2.V = parseFloat(dataArr[1]);
+    pzemData.L3.V = parseFloat(dataArr[2]);
 
-    for(let uid in userData){
+    pzemData.L1.A = parseFloat(dataArr[3]);
+    pzemData.L2.A = parseFloat(dataArr[4]);
+    pzemData.L3.A = parseFloat(dataArr[5]);
+
+    pzemData.L1.W = parseFloat(dataArr[6]);    
+    pzemData.L2.W = parseFloat(dataArr[7]);
+    pzemData.L3.W = parseFloat(dataArr[8]);
+
+    pzemData.L1.kWh = parseFloat(dataArr[9]);
+    pzemData.L2.kWh = parseFloat(dataArr[10]);
+    pzemData.L3.kWh = parseFloat(dataArr[11]);
+
+    //stats = updstats(stats, dataArr);
+
+    for(var L in stats){
+        for (var VAWH in stats[L]){
+            //stats[L][VAWH].today.min = pzemData[L][VAWH];
+
+            val = pzemData[L][VAWH]
+
+            if (typeof stats[L][VAWH].today.min == "undefined"){
+                stats[L][VAWH].today.min = val;
+            }
+            else if (val < stats[L][VAWH].today.min ) { 
+                stats[L][VAWH].today.min = val;
+            }
+
+            if (typeof stats[L][VAWH].today.max == "undefined"){
+                stats[L][VAWH].today.max = val;
+            } 
+            else if (val > stats[L][VAWH].today.max) { 
+                stats[L][VAWH].today.max = val;
+            }
+        }
+    }
+
+    stats.lastupd = Date.now();
+
+    // dataArr.forEach( (el,i) => {
+    //     fl = parseFloat(el);
+    //     if (i < 9) {
+    //         if (typeof stats.today[i].min == "undefined"){
+    //             stats.today[i].min = fl;
+    //         }
+    //         else if (typeof stats.today[i].max == "undefined"){
+    //             stats.today[i].max = fl;
+    //         } 
+    //         else if (fl < stats.today[i].min ) { 
+    //             stats.today[i].min = fl;
+    //         }
+    //         else if (fl > stats.today[i].max) { 
+    //             stats.today[i].max = fl;
+    //         }
+            
+    //     }else if(i <= 11) {
+    //         stats.today[i] = el;
+    //     }
+    // });
+
+    writeStats();
+
+    var tempArr = [ [[v1,v2,v3], [a1,a2,a3], [w1,w2,w3], [kwh1,kwh2,kwh3]], [v1,a1,w1,kwh1], [v2,a2,w2,kwh2], [v3,a3,w3,kwh3]];
+
+    for(let uid in userData) {
         userData[uid].notif.forEach( (el) => {
             if (checkCondition(el, tempArr) && ( (Date.now() - el.timestamp) > userData[uid].notifCoolDown || el.timestamp === undefined)  ){
                 var replyStr = loc.translate(userData[uid].lang, 'gotNotification');
@@ -759,6 +856,7 @@ pingGoogle();
 process.once('SIGINT', () => {
     stopAll('SIGINT');
 });  
+
 process.once('SIGTERM', () => {
     stopAll('SIGTERM');
 });
