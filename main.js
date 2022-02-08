@@ -693,22 +693,22 @@ bot.action('delNotif11', (ctx) => {
 });
 
 bot.action('periodToday', (ctx) =>{
-    ctx.editMessageText('Обычный \n ```12123 123123\n123123eefr3\n``` ', { parse_mode: 'MarkdownV2' });
+    ctx.editMessageText('Stats are not here yet');
     userData[ctx.from.id].state = 0;
 });
 
 bot.action('periodYesterday', (ctx) =>{
-    ctx.editMessageText('2');
+    ctx.editMessageText('Stats are not here yet');
     userData[ctx.from.id].state = 0;
 });
 
 bot.action('periodWeek', (ctx) =>{
-    ctx.editMessageText('3');
+    ctx.editMessageText('Stats are not here yet');
     userData[ctx.from.id].state = 0;
 });
 
 bot.action('periodMonth', (ctx) =>{
-    ctx.editMessageText('4');
+    ctx.editMessageText('Stats are not here yet');
     userData[ctx.from.id].state = 0;
 });
 
