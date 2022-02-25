@@ -427,7 +427,7 @@ bot.on('text',(ctx) => {
                 break;
 
             case 8: //Добавление уведомлений
-                var val = parseInt(txt);
+                var val = parseFloat(txt);
                 if (val > 0){
                     var tmpNotif = userData[uid].notifTmp;
                     delete tmpNotif.str;
@@ -456,7 +456,7 @@ bot.on('text',(ctx) => {
 
             case 10: //Кулдаун уведомлений
                 var val = parseInt(txt);
-                if ((val < 500) && (val > 0)){
+                if ((val < 9999) && (val > 0)){
                     userData[uid].notifCoolDown = val * 1000;
                     userData[uid].state = 1;
                     ctx.reply(tr(ctx, 'settings'), kb.settingsKb(userData[uid].lang));
