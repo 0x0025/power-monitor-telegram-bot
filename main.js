@@ -5,7 +5,7 @@ const fs = require('fs');
 const ping = require("net-ping");
 
 var pngsession = ping.createSession ();
-var config = require('./config.json'); //Потом тоже чтение кфг сделать
+var config = require('./config.json');
 var kb = require('./keyboards.js');
 var loc = require('./localization.js');
 
@@ -19,8 +19,14 @@ var stats = {};
 
 function readUserData(){
     fs.readFile('./userData.json',{encoding: 'utf8'},function(err,data) {
-        userData = JSON.parse(data);
-        log2('readUserData()');
+        if (err){
+            userData = {};
+            console.warn("NO USERDATA SAVED");
+        }
+        else{
+            userData = JSON.parse(data);
+            log2('readUserData()');
+        }
     });
 }
 

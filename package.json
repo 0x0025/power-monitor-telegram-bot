@@ -8,17 +8,17 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ox25/power-monitor-telegram-bot.git"
+    "url": "git+https://github.com/0x0025/power-monitor-telegram-bot.git"
   },
   "keywords": [
     "telegram"
   ],
   "author": "0x25",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ox25/power-monitor-telegram-bot/issues"
+    "url": "https://github.com/0x0025/power-monitor-telegram-bot/issues"
   },
-  "homepage": "https://github.com/ox25/power-monitor-telegram-bot#readme",
+  "homepage": "https://github.com/0x0025/power-monitor-telegram-bot#readme",
   "dependencies": {
     "net-ping": "^1.2.3",
     "scramjet": "^4.36.0",

@@ -37,7 +37,7 @@ const rus = {
     'notifLess': 'ниже',
     'notifMore': 'выше',
     'anyLine': 'Одна из фаз',
-    'notifCD':'Кулдаун уведомлений',
+    'notifCD':'Повтор уведомлений',
     'anyLine2':'Любая фаза',
     'ChoosePeriod':'Выберите период:',
     'today':'Сегодня',
