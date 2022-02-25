@@ -427,7 +427,7 @@ bot.on('text',(ctx) => {
                 break;
 
             case 8: //Добавление уведомлений
-                var val = parseFloat(txt);
+                var val = parseInt(txt);
                 if (val > 0){
                     var tmpNotif = userData[uid].notifTmp;
                     delete tmpNotif.str;
