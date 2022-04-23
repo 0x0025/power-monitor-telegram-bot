@@ -2,9 +2,9 @@ const { Telegraf, Markup } = require('telegraf');
 const SerialPort = require('serialport');
 const { StringStream } = require('scramjet'); 
 const fs = require('fs');
-const ping = require("net-ping");
+//const ping = require("net-ping");
 
-var pngsession = ping.createSession ();
+//var pngsession = ping.createSession ();
 var config = require('./config.json');
 var kb = require('./keyboards.js');
 var loc = require('./localization.js');
@@ -747,18 +747,18 @@ bot.catch((err, ctx) => {
     stopAll('SIGINT');
 });
 
-function pingGoogle(){
-    pngsession.pingHost ("8.8.8.8", function (error, target) {
-        if (error){
-            console.log (target + ": " + error.toString ());
-            stopAll('SIGINT');
-        }
-        else
-            log2(target + ": Alive");
-    });
-}
+// function pingGoogle(){
+//     pngsession.pingHost ("8.8.8.8", function (error, target) {
+//         if (error){
+//             console.log (target + ": " + error.toString ());
+//             stopAll('SIGINT');
+//         }
+//         else
+//             log2(target + ": Alive");
+//     });
+//}
 
-pingGoogleInterval = setInterval(pingGoogle, 6000);
+// pingGoogleInterval = setInterval(pingGoogle, 6000);
 
 pingGoogle();
 
