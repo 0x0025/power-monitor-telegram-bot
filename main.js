@@ -760,7 +760,7 @@ bot.catch((err, ctx) => {
 
 // pingGoogleInterval = setInterval(pingGoogle, 6000);
 
-pingGoogle();
+//pingGoogle();
 
 process.once('SIGINT', () => {
     stopAll('SIGINT');
