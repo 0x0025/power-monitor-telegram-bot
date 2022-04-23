@@ -48,7 +48,7 @@ function log2(str){
     }
 }
 
-setInterval(writeUserData, 30000);
+//setInterval(writeUserData, 30000);
 readUserData();
 
 var portOpenRetry;
@@ -771,7 +771,7 @@ process.once('SIGTERM', () => {
 
 function stopAll(chtoto){
     bot.stop(chtoto);
-    clearInterval(pingGoogleInterval);
+    //clearInterval(pingGoogleInterval);
     writeUserData();
     console.log('bot.stop');
     setTimeout(()=>{process.exit();}, 2000);
